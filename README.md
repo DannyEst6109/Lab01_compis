@@ -1,10 +1,13 @@
-# Laboratorio 01 - Conversión directa de ER a AFD
+# Proyecto 1 - Diseño de lenguajes de programación
+Este proyecto está conformado por varios laboratorios, estos se encuentran dentro de las carpetas corresponientes al nombre del laboratorio.
+
+## Laboratorio 01 - Conversión directa de ER a AFD
 
 Proyecto en Python que implementa el **método directo** para construir un **Autómata Finito Determinista (AFD)** a partir de una **expresión regular**, sin pasar por AFN.
 
 También permite simular el AFD para validar si una cadena pertenece al lenguaje.
 
-## ✅ Qué cubre este proyecto
+### Funcionalidades del laboratorio 01
 
 - Ingreso de expresión regular.
 - Construcción del árbol sintáctico.
@@ -16,7 +19,7 @@ También permite simular el AFD para validar si una cadena pertenece al lenguaje
 - Simulación de cadenas sobre el AFD.
 - Modo de demostración con **3 expresiones regulares** (incluye todos los operadores requeridos).
 
-## Operadores soportados
+## Operadores soportados dentro del laboratorio 01
 
 - Unión: `|`
 - Concatenación implícita
@@ -24,13 +27,7 @@ También permite simular el AFD para validar si una cadena pertenece al lenguaje
 - Cerradura positiva: `+`
 - Opcional: `?`
 
-> Restricción del curso: no se usan librerías de regex para construir ni simular el autómata.
-
-## Requisitos
-
-- Python 3.10+
-
-## Ejecución
+## Ejecución laboratorio 01
 
 ```bash
 python main.py
@@ -41,20 +38,10 @@ El programa ofrece dos modos:
 1. **Interactivo**: ingresas una expresión y una cadena.
 2. **Demo**: ejecuta 3 casos listos para mostrar en video (aceptada y rechazada por cada ER).
 
-## Pruebas automáticas
+---
+## Laboratorio 02
 
-```bash
-python -m unittest discover -s tests -p "test_*.py"
-```
+---
+## Requisitos
 
-## Sugerencia para el video (≤ 5 min)
-
-1. Ejecutar `python main.py`.
-2. Elegir modo `2` (Demo).
-3. Mostrar para cada caso:
-   - expresión regular,
-   - tabla de transición,
-   - cadena aceptada,
-   - cadena rechazada.
-
-Así cubres todos los entregables y operadores solicitados.
+- Python 3.10+

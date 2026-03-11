@@ -122,5 +122,5 @@ def main():
         print(f"Error: {exc}")
 
 
-if __name__ == "__main__":
-    main()
+
+main()
