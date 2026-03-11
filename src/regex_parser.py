@@ -1,9 +1,40 @@
 OPERATORS = {"|", ".", "*", "+", "?", "(", ")"}
 UNARY_OPERATORS = {"*", "+", "?"}
+BINARY_OPERATORS = {"|", "."}
 
 
 def is_symbol(char: str) -> bool:
     return char not in OPERATORS
+
+
+def validate_regex(regex: str) -> None:
+    if not regex:
+        raise ValueError("La expresión regular no puede estar vacía.")
+
+    balance = 0
+    previous = None
+
+    for i, token in enumerate(regex):
+        if token == "(":
+            balance += 1
+        elif token == ")":
+            balance -= 1
+            if balance < 0:
+                raise ValueError("Paréntesis desbalanceados: ')' sin apertura.")
+
+        if token in BINARY_OPERATORS:
+            if i == 0 or i == len(regex) - 1:
+                raise ValueError(f"Operador binario '{token}' en posición inválida.")
+            if previous in BINARY_OPERATORS or previous == "(":
+                raise ValueError(f"Secuencia inválida antes de '{token}'.")
+
+        if token in UNARY_OPERATORS and previous in BINARY_OPERATORS:
+            raise ValueError(f"Operador unario '{token}' sin operando válido.")
+
+        previous = token
+
+    if balance != 0:
+        raise ValueError("Paréntesis desbalanceados en la expresión regular.")
 
 
 def needs_concat(c1: str, c2: str) -> bool:
@@ -13,9 +44,6 @@ def needs_concat(c1: str, c2: str) -> bool:
 
 
 def add_explicit_concat(regex: str) -> str:
-    if not regex:
-        raise ValueError("La expresión regular no puede estar vacía.")
-
     result = []
     for i, c1 in enumerate(regex):
         result.append(c1)
@@ -33,8 +61,7 @@ def prepare_regex(regex: str) -> str:
     y concatenación explícita.
     """
     regex = regex.replace(" ", "")
-    if not regex:
-        raise ValueError("La expresión regular no puede estar vacía.")
+    validate_regex(regex)
 
     augmented = f"({regex})#"
     return add_explicit_concat(augmented)
