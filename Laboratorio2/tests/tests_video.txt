@@ -1,0 +1,7 @@
+(a|b)*c?d      Ya sale minimizado. Es el mismo que el video pasado
+(a|b)cc*d(a|b)?     Ya sale minimizado. Nuevo
+
+
+(a|b)c|ac      Fuerza minimizacion
+a(a|b)*|b(a|b)*     tambien siempre pasa por el minimizador
+(aa)*|(aa)*a*       fuerza minimizacion. lo vuelve todo en un a*

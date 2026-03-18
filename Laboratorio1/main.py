@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-from src.direct_dfa import build_dfa, print_followpos_table, print_transition_table
-from src.regex_parser import extract_alphabet, prepare_regex, to_postfix
-from src.simulator import simulate_dfa
-from src.syntax_tree import build_syntax_tree, compute_functions
+import sys
+import os
+root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(root_path)
+from Laboratorio1.src.direct_dfa import build_dfa, print_followpos_table, print_transition_table
+from Laboratorio1.src.regex_parser import extract_alphabet, prepare_regex, to_postfix
+from Laboratorio1.src.simulator import simulate_dfa
+from Laboratorio1.src.syntax_tree import build_syntax_tree, compute_functions
 
 
 EXAMPLES = [
@@ -123,4 +127,5 @@ def main():
 
 
 
-main()
+if __name__ == "__main__":
+    main()      #para que solo se ejecute cuando se corra directamente este archivo
