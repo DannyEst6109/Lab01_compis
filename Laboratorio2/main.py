@@ -27,7 +27,7 @@ def show_dfa(label, states, transitions, accepting_states, alphabet):
 
 
 def run_minimization(regex: str):
-    """Pipeline completo: regex → AFD directo → AFD mínimo → comparación."""
+    #regex → AFD directo → AFD mínimo → comparación.
 
     # 1. Construir AFD con método directo
     compiled = compile_regex(regex)
@@ -63,18 +63,18 @@ def run_minimization(regex: str):
 
 
 def ask_string(min_transitions, min_accepting):
-    """Solicita una cadena y la simula sobre el AFD mínimo."""
+    #Solicita una cadena y la simula sobre el AFD mínimo.
     cadena = input("\n  Ingrese una cadena para validar: ").strip()
     accepted, path = simulate_dfa(min_transitions, min_accepting, cadena)
     print(f"  Camino : {' → '.join(path)}")
     if accepted:
-        print(f"  ✔  '{cadena}' SÍ pertenece al lenguaje.")
+        print(f"  *  '{cadena}' SÍ pertenece al lenguaje.")
     else:
-        print(f"  X  '{cadena}' NO pertenece al lenguaje.")
+        print(f"  *  '{cadena}' NO pertenece al lenguaje.")
 
 
 def show_string(min_transitions, min_accepting, cadena: str):
-    """Simula una cadena predeterminada (sin input, usada en la demo."""
+    #Simula una cadena predeterminada (sin input, usada en la demo.
     accepted, path = simulate_dfa(min_transitions, min_accepting, cadena)
     print(f"  Cadena : '{cadena}'")
     print(f"  Camino : {' → '.join(path)}")
@@ -128,18 +128,21 @@ def run_demo():
 
 # menu 
 def main():
-    print("╔══════════════════════════════════════════════╗")
-    print("║   Laboratorio 02 — Minimización de AFD       ║")
-    print("╚══════════════════════════════════════════════╝")
+    print("")
+    print("---------  Laboratorio 02 — Minimización de AFD  ------------")
+    print("")
 
     while True:
-        print("\n  [1] Ingresar expresión regular")
-        print("  [2] Demo")
-        print("  [3] Salir")
-        opcion = input("  Opción: ").strip()
+        print("")
+        print("1) Ingresar expresión regular")
+        print("2) Demo")
+        print("3) Salir")
+        opcion = input("Seleccione una opción: ").strip()
+        print("")
 
         if opcion == "1":
-            regex = input("  Expresión regular: ").strip()
+            print("Puede ingresar simbolos como () | * + ? ")
+            regex = input("Ingrese una expresión regular: ").strip()
             try:
                 min_states, min_transitions, min_accepting, alphabet = run_minimization(regex)
             except Exception as e:

@@ -3,7 +3,7 @@ Este proyecto está conformado por varios laboratorios, estos se encuentran dent
 
 ## Laboratorio 01 - Conversión directa de ER a AFD
 
-Proyecto en Python que implementa el **método directo** para construir un **Autómata Finito Determinista (AFD)** a partir de una **expresión regular**, sin pasar por AFN.
+Proyecto en Python que implementa el método directo para construir un Autómata Finito Determinista (AFD) a partir de una expresión regular, sin pasar por AFN.
 
 También permite simular el AFD para validar si una cadena pertenece al lenguaje.
 
@@ -40,6 +40,43 @@ El programa ofrece dos modos:
 
 ---
 ## Laboratorio 02
+Este laboratorio consiste en extender la funcionalidad desarrollada en el Laboratorio 01 (construcción de AFD a partir de expresiones regulares mediante el método directo) para implementar el algoritmo de minimización de autómatas finitos deterministas (AFD).
+
+El objetivo principal es optimizar el autómata generado, reduciendo el número de estados sin alterar el lenguaje que reconoce
+
+
+### Funcionalidades del laboratorio 02
+
+El programa desarrollado permite:
+- Ingresar una expresión regular. 
+- Construir el AFD usando el método directo.
+- Generar la tabla de transición del AFD original.
+- Aplicar el algoritmo de minimización.
+- Generar la tabla de transición del AFD minimizado.
+- Mostrar:
+    Número de estados (original vs minimizado)
+    Número de transiciones (original vs minimizado)
+- Ingresar una cadena de prueba.
+- Determinar si la cadena Pertenece o no al lenguaje
+
+### Mejoras respecto al Laboratorio 01
+
+Se añade la optimización del autómata
+Reducción de complejidad
+Mejora en eficiencia de reconocimiento
+Comparación entre versiones del AFD
+
+## Ejecución laboratorio 02
+
+```bash
+python main.py
+```
+
+El programa ofrece dos modos:
+
+1. **Interactivo**: ingresas una expresión y una cadena.
+2. **Demo**: ejecuta 3 casos listos para mostrar en video (aceptada y rechazada por cada ER).
+
 
 ---
 ## Requisitos

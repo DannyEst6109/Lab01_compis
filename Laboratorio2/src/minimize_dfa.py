@@ -1,22 +1,20 @@
-"""
-Minimización de AFD usando el algoritmo de particiones (Hopcroft).
 
-Formatos esperados (idénticos a direct_dfa.py del Lab01):
-  states           : list[ (state_name: str, positions: set) ]
-  transitions      : dict[ state_name ][ symbol ] -> state_name | "-"
-  accepting_states : set[ state_name ]
-  alphabet         : list[ str ]
-"""
+# Minimización de AFD usando el algoritmo de particiones (Hopcroft).
+
+# Formatos esperados (idénticos a direct_dfa.py del Lab01):
+#   states           : list[ (state_name: str, positions: set) ]
+#   transitions      : dict[ state_name ][ symbol ] -> state_name | "-"
+#   accepting_states : set[ state_name ]
+#   alphabet         : list[ str ]
+
 
 
 # Función principal
+# Recibe el AFD generado por el método directo y devuelve el AFD mínimo
+# en el mismo formato que build_dfa() de direct_dfa.py.
+# Retorna: (new_states, new_transitions, new_accepting_states)
 def minimize_dfa(states, transitions, accepting_states, alphabet):
-    """
-    Recibe el AFD generado por el método directo y devuelve el AFD mínimo
-    en el mismo formato que build_dfa() de direct_dfa.py.
-
-    Retorna: (new_states, new_transitions, new_accepting_states)
-    """
+    
     state_names = [name for name, _ in states]
 
     # Paso 1: partición inicial
@@ -50,7 +48,7 @@ def minimize_dfa(states, transitions, accepting_states, alphabet):
 
 # Helpers internos
 def _find_partition_index(state, partitions):
-    """Devuelve el índice de la partición a la que pertenece `state`, o None si es '-'."""
+    #Devuelve el índice de la partición a la que pertenece `state`, o None si es '-'.
     if state == "-":
         return None
     for i, group in enumerate(partitions):
@@ -60,11 +58,11 @@ def _find_partition_index(state, partitions):
 
 
 def _split_group(group, partitions, transitions, alphabet):
-    """
-    Intenta dividir `group` en subgrupos de estados indistinguibles.
-    Dos estados son indistinguibles si, para todo símbolo del alfabeto,
-    sus destinos caen en la misma partición actual.
-    """
+    
+    # Intenta dividir group en subgrupos de estados indistinguibles.
+    # Dos estados son indistinguibles si, para todo símbolo del alfabeto,
+    # sus destinos caen en la misma partición actual.
+    
     group_list = list(group)
     subgroups  = []                  # list[ list[state_name] ]
 
@@ -83,7 +81,7 @@ def _split_group(group, partitions, transitions, alphabet):
 
 
 def _same_signature(s1, s2, partitions, transitions, alphabet):
-    """True si s1 y s2 tienen exactamente la misma firma de transición."""
+    #True si s1 y s2 tienen exactamente la misma firma de transición.
     for symbol in alphabet:
         dest1 = transitions[s1].get(symbol, "-")
         dest2 = transitions[s2].get(symbol, "-")
@@ -92,9 +90,8 @@ def _same_signature(s1, s2, partitions, transitions, alphabet):
     return True
 
 
-def _build_minimized_dfa(partitions, old_states, old_transitions,
-                         old_accepting, alphabet, start_state):
-    """Construye el nuevo AFD a partir de las particiones finales."""
+def _build_minimized_dfa(partitions, old_states, old_transitions, old_accepting, alphabet, start_state):
+    #Construye el nuevo AFD a partir de las particiones finales.
 
     # Reordenar para que la partición del estado inicial quede primero (→ "S0")
     start_part = next(p for p in partitions if start_state in p)
@@ -143,15 +140,10 @@ def _build_minimized_dfa(partitions, old_states, old_transitions,
     return new_states, new_transitions, new_accepting
 
 
-# ---------------------------------------------------------------------------
 # Comparación y estadísticas
-# ---------------------------------------------------------------------------
-
-def compare_dfas(original_states, original_transitions,
-                 min_states, min_transitions, alphabet):
-    """
-    Imprime una comparación entre el AFD directo y el minimizado.
-    """
+def compare_dfas(original_states, original_transitions, min_states, min_transitions, alphabet):
+    
+    #Imprime una comparación entre el AFD directo y el minimizado.
     def count_transitions(trans, alph):
         return sum(
             1
@@ -165,21 +157,21 @@ def compare_dfas(original_states, original_transitions,
     orig_t  = count_transitions(original_transitions, alphabet)
     min_t   = count_transitions(min_transitions, alphabet)
 
-    print("\n╔══════════════════════════════════════════════╗")
-    print("║         Comparación AFD directo vs mínimo    ║")
-    print("╠══════════════════════════════════════╦═══════╣")
-    print(f"║ {'Métrica':<36} {'Directo':>4} │ {'Mínimo':>5} ║")
-    print("╠══════════════════════════════════════╬═══════╣")
-    print(f"║ {'Número de estados':<36} {orig_n:>4}  │ {min_n:>5}  ║")
-    print(f"║ {'Número de transiciones reales':<36} {orig_t:>4}  │ {min_t:>5}  ║")
-    print("╠══════════════════════════════════════╬═══════╣")
+    print("\n╔═════════════════════════════════════════════════════════╗")
+    print("║             Comparación AFD directo vs mínimo           ║")
+    print("╠══════════════════════════════════════╦═════════╦════════╣")
+    print(f"║ {'Métrica':<36} ║ {'Directo':>4} ║ {'Mínimo':>5} ║")
+    print("╠══════════════════════════════════════╬═════════╬════════╣")
+    print(f"║ {'Número de estados':<36} ║ {orig_n:>4}    ║ {min_n:>5}  ║")
+    print(f"║ {'Número de transiciones reales':<36} ║ {orig_t:>4}    ║ {min_t:>5}  ║")
+    print("╠═════════════════════════════════════════════════════════╣")
 
     if orig_n == min_n:
-        print("║  ✔  El AFD directo YA era mínimo.              ║")
+        print("║     El AFD directo YA era mínimo.                       ║")
     else:
         saved_s = orig_n - min_n
         saved_t = orig_t - min_t
-        print(f"║  ✔  Estados reducidos : {saved_s:>2}                      ║")
-        print(f"║  ✔  Transiciones red. : {saved_t:>2}                      ║")
+        print(f"║     Estados reducidos : {saved_s:>2}                              ║")
+        print(f"║     Transiciones red. : {saved_t:>2}                              ║")
 
-    print("╚══════════════════════════════════════════════╝")
+    print("╚═════════════════════════════════════════════════════════╝")
