@@ -49,6 +49,10 @@ def _display(ch: str) -> str:
     #Convierte un char interno a su representación legible.
     return _PLACEHOLDER_TO_CHAR.get(ch, ch)
 
+def _state_int(name: str) -> int:
+    # convierte "S0"→0, "S12"→12. Lo usa build_dfa_dict()
+    # para que el Paso 4 trabaje con estados como enteros.
+    return int(name[1:])
 
 #  PREPROCESAR ESCAPES
 # Reemplaza secuencias \c en la regex expandida por placeholders.
@@ -84,9 +88,9 @@ def _build_combined(rules: list) -> tuple:
     parts    = []
     mk_tokens = {}    # char → (token_name, prioridad)
 
-    for i, (regex, token, priority) in enumerate(rules):
+    for i, (regex, token, priority, action) in enumerate(rules):
         marker = chr(_MARKER_BASE + i)
-        mk_tokens[marker] = (token, priority)
+        mk_tokens[marker] = (token, priority, action)
 
         processed = _preprocess_escapes(regex)
         parts.append(f"({processed}){marker}")
@@ -124,19 +128,22 @@ def _build_multi_dfa(root, followpos, pos_to_symbol, dfa_alphabet, marker_positi
         # Si hay varios, gana el de menor prioridad (primero en el .yal).
         best_token    = None
         best_priority = float('inf')
+        best_action   = ""
 
         for pos in current_state:
             if pos in marker_positions:
-                tok, pri = marker_positions[pos]
+
+                tok, pri, act = marker_positions[pos]
                 if pri < best_priority:
                     best_priority = pri
                     best_token    = tok
+                    best_action   = act
 
         if best_token is not None or best_priority < float('inf'):
             # best_token puede ser None (regla de skip) pero el estado
             # igualmente "acepta" (el lexer avanza y descarta el lexema)
             accepting_states.add(current_name)
-            accepting_tokens[current_name] = best_token
+            accepting_tokens[current_name] = (best_token, best_priority, best_action)
 
         #Transiciones (solo sobre chars reales) 
         transitions[current_name] = {}
@@ -182,7 +189,7 @@ def _minimize_multi_dfa(states, transitions, accepting_states, accepting_tokens,
     for s in state_names:
         if s in accepting_tokens:
             # La clave agrupa por token (incluyendo None para skip-rules)
-            key = accepting_tokens[s]   # puede ser None
+            key = accepting_tokens[s][0]   # puede ser None
             token_groups[key].add(s)
         else:
             non_accepting.add(s)
@@ -260,14 +267,11 @@ def _minimize_multi_dfa(states, transitions, accepting_states, accepting_tokens,
         new_states.append((name, merged))
 
         # Token: todos los del grupo tienen el mismo (por diseño)
-        group_token = None
         for s in group:
             if s in accepting_tokens:
                 new_accepting.add(name)
-                group_token = accepting_tokens[s]
+                new_acc_tokens[name] = accepting_tokens[s]  # tupla completa
                 break
-        if name in new_accepting:
-            new_acc_tokens[name] = group_token
 
         # Transiciones usando el representante del grupo
         rep = next(iter(group))
@@ -288,7 +292,7 @@ def build_lexer(rules: list, minimize: bool = True, verbose: bool = True) -> dic
         raise ValueError("La lista de reglas está vacía.")
 
     # Filtrar reglas EOF / eof (son manejadas por el lexer a nivel superior)
-    active_rules = [(r, t, p) for r, t, p in rules if t != 'EOF']
+    active_rules = [(r, t, p, a) for r, t, p, a in rules if t != 'EOF']
     if len(active_rules) < len(rules):
         if verbose:
             print(f"  [build_lexer] Regla EOF omitida del AFD "
@@ -354,7 +358,8 @@ def build_lexer(rules: list, minimize: bool = True, verbose: bool = True) -> dic
     if verbose:
         print(f"    AFD directo: {len(states)} estados, "
               f"{len(accepting_states)} de aceptación")
-        for sname, tok in sorted(accepting_tokens.items()):
+        for sname, tok_tuple in sorted(accepting_tokens.items()):
+            tok, pri, act = tok_tuple
             tok_str = tok if tok is not None else "(skip)"
             print(f"      {sname} → {tok_str}")
 
@@ -405,6 +410,93 @@ def build_lexer(rules: list, minimize: bool = True, verbose: bool = True) -> dic
         "n_rules":          len(active_rules),
     }
 
+# que consume el Paso 4 (generación del lexer.py independiente).
+# Llama a build_lexer internamente y hace tres conversiones:
+#   1. Estados "S0","S1",... → enteros 0, 1, ...
+#   2. Chars internos (placeholders) → char real visible (+ - * etc.)
+#   3. Transiciones muertas ("-") se omiten del dict
+#   4. accepting_tokens (tupla) → dict con priority/token/action
+#
+# Parámetros:
+#   rules  : parser.get_all_rules()   ← incluir skip rules
+#   parser : instancia de YALexParser (para header/entrypoint)
+#
+# Retorna el dict acordado con el Paso 4:
+# {
+#   "initial_state": 0,
+#   "transitions": { 0: {"a": 1, "+": 5}, ... },
+#   "accepting_states": {
+#       3: {"priority": 0, "token": "INT", "action": "return INT"},
+#       8: {"priority": 2, "token": None,  "action": ""},
+#   },
+#   "entrypoint": "gettoken",
+#   "header":     "import myToken",
+#   "trailer":    "",
+# }
+def build_dfa_dict(rules: list, parser=None,
+                   minimize: bool = True,
+                   verbose: bool = True) -> dict:
+ 
+    internal = build_lexer(rules, minimize=minimize, verbose=verbose)
+ 
+    states         = internal["states"]
+    transitions    = internal["transitions"]
+    accepting_toks = internal["accepting_tokens"]  # {nombre: (token, pri, action)}
+    display_map    = internal["display_map"]
+    dfa_alphabet   = internal["alphabet"]
+ 
+    state_order = [name for name, _ in states]
+ 
+    # Transitions: "S0"→"S1" con char interno  →  0→1 con char visible
+    new_transitions = {}
+    for sname in state_order:
+        s_int = _state_int(sname)
+        new_transitions[s_int] = {}
+        for sym, dest in transitions[sname].items():
+            if dest == "-":
+                continue                               # omitir transiciones muertas
+            visible  = display_map.get(sym, sym)       # placeholder → char real
+            dest_int = _state_int(dest)
+            new_transitions[s_int][visible] = dest_int
+ 
+    # Accepting states: tupla → dict con priority/token/action
+    new_accepting = {}
+    for sname, (token, priority, action) in accepting_toks.items():
+        new_accepting[_state_int(sname)] = {
+            "priority": priority,
+            "token":    token,              # puede ser None (skip)
+            "action":   action.strip(),
+        }
+ 
+    # Metadata del parser
+    entrypoint = getattr(parser, "entrypoint", "tokens") if parser else "tokens"
+    header     = getattr(parser, "header",     "")       if parser else ""
+    trailer    = getattr(parser, "trailer",    "")       if parser else ""
+ 
+    result = {
+        "initial_state":    0,
+        "transitions":      new_transitions,
+        "accepting_states": new_accepting,
+        "entrypoint":       entrypoint,
+        "header":           header.strip(),
+        "trailer":          trailer.strip(),
+    }
+ 
+    if verbose:
+        print(f"\n{'═'*56}")
+        print("  DICCIONARIO FINAL  (formato Paso 4)")
+        print(f"{'═'*56}")
+        print(f"  initial_state : {result['initial_state']}")
+        print(f"  entrypoint    : {result['entrypoint']}")
+        print(f"  header        : {repr(result['header'][:50])}")
+        print(f"  accepting_states:")
+        for st, info in sorted(result["accepting_states"].items()):
+            tok = info["token"] if info["token"] else "(skip)"
+            print(f"    estado {st}: {tok:12} prioridad={info['priority']}  "
+                  f"action={repr(info['action'][:30])}")
+        print(f"{'═'*56}\n")
+ 
+    return result
 
 # ══════════════════════════════════════════════════════════════════════
 #  UTILIDADES DE DISPLAY: Imprime la tabla de transición del AFD multi-token.
@@ -413,6 +505,7 @@ def build_lexer(rules: list, minimize: bool = True, verbose: bool = True) -> dic
 #     - Los chars placeholder se muestran como su char real (\+ → +)
 #     - La columna Token muestra el nombre del token o '(skip)'
 def print_multi_dfa(result: dict):
+
     states          = result["states"]
     transitions     = result["transitions"]
     accepting_states= result["accepting_states"]
@@ -439,7 +532,7 @@ def print_multi_dfa(result: dict):
             print(f"{dest:<{col_w[j+1]}}", end="")
 
         if state_name in accepting_tokens:
-            tok = accepting_tokens[state_name]
+            tok = accepting_tokens[state_name][0]
             tok_str = tok if tok is not None else "(skip)"
         else:
             tok_str = ""
@@ -456,39 +549,43 @@ def summary(result: dict):
     print(f"  Tamaño alfabeto   : {len(result['alphabet'])} chars")
     print(f"\n  Tokens reconocidos:")
     seen = set()
-    for tok in result["accepting_tokens"].values():
+    for tok_tuple in result["accepting_tokens"].values():
+        # CAMBIO: extraer token de la tupla.
+        # ANTES:  tok = tok  (era directamente el string)
+        tok = tok_tuple[0]
+    
         lbl = tok if tok is not None else "(skip/ignorar)"
         if lbl not in seen:
             seen.add(lbl)
             print(f"    · {lbl}")
-    print(f"{'═'*56}\n")
+    print(f"{'-'*56}\n")
 
 
 #  PUNTO DE ENTRADA — prueba standalone
 if __name__ == "__main__":
-
-    # Agregar el directorio del script al path para encontrar yalex_parser
+ 
     sys.path.insert(0, os.path.dirname(__file__))
     from ParserYal import YALexParser
-
+ 
     yal_file = sys.argv[1] if len(sys.argv) > 1 else "ejemplo.yal"
-
     print(f"Archivo: {yal_file}")
-
-    # Parsear el .yal
-    parser = YALexParser().parse(yal_file)
-
-    # Usar get_all_rules() para incluir también las reglas de skip
+ 
+    parser    = YALexParser().parse(yal_file)
     all_rules = parser.get_all_rules()
-
+ 
     print(f"\nReglas (incluyendo skip):")
-    for regex, token, pri in all_rules:
+    #  desempacar 4 valores (se agregó action).
+    for regex, token, pri, action in all_rules:
+  
         tok_str = token if token is not None else "(skip)"
         print(f"  [{pri}] {tok_str:12} → {regex[:50]}")
-
-    # Construir el AFD multi-token
-    result = build_lexer(all_rules, minimize=True, verbose=True)
-
-    # Mostrar tabla y resumen
+ 
+    # usar build_dfa_dict en vez de build_lexer directamente,
+    # ya que build_dfa_dict produce el formato que consume el Paso 4.
+    dfa_dict = build_dfa_dict(all_rules, parser=parser, minimize=True, verbose=True)
+ 
+    # Mostrar tabla (opcional, usa el resultado interno de build_lexer)
+    result = build_lexer(all_rules, minimize=True, verbose=False)
     print_multi_dfa(result)
     summary(result)
+ 

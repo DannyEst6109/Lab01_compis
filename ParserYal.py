@@ -65,7 +65,7 @@ class YALexParser:
     def get_lab01_rules(self) -> list:
         
         return [
-            (r["regex"], r["token"], r["priority"])
+            (r["regex"], r["token"], r["priority"], r["action"])
             for r in self.rules
             if r["token"] is not None
         ]
@@ -74,7 +74,7 @@ class YALexParser:
     #si el lexer necesita saber cuándo avanzar sin emitir token.
     def get_all_rules(self) -> list:
         return [
-            (r["regex"], r["token"], r["priority"])
+            (r["regex"], r["token"], r["priority"], r["action"])
             for r in self.rules
         ]
     
@@ -612,22 +612,24 @@ class YALexParser:
 #  PUNTO DE ENTRADA — uso desde línea de comandos
 if __name__ == '__main__':
     import sys
-
+ 
     filepath = sys.argv[1] if len(sys.argv) > 1 else 'ejemplo.yal'
-
-    print(f"Uso: python yalex_parser.py [archivo.yal]")
-
+ 
+    print(f"Uso: python ParserYal.py [archivo.yal]")
+ 
     parser = YALexParser()
     try:
         parser.parse(filepath)
         parser.summary()
-
+ 
         print("\n[Reglas listas para el Lab 01]")
         print("(esto es lo que pasas al constructor de AFD)")
         print()
-        for regex, token, priority in parser.get_lab01_rules():
+       
+        for regex, token, priority, action in parser.get_lab01_rules():
             print(f"  prioridad={priority:<3} token={token:<12} regex={regex}")
-
+            print(f"  {'':>14} action={action}")
+       
     except FileNotFoundError:
         print(f"\nError: No se encontró el archivo '{filepath}'")
     except SyntaxError as e:
