@@ -39,8 +39,8 @@ let ws     = [' ' '\t']
 rule gettoken =
     ws+                          { return None }     (* ignorar espacios y tabs *)
   | ['\n']                       { return EOL }      (* fin de línea → token EOL *)
-  | digit+                       { return INT }      (* entero:     42, 100, 007 *)
   | digit+ '.' digit+            { return FLOAT }    (* flotante:   3.14, 0.5   *)
+  | digit+                       { return INT }      (* entero:     42, 100, 007 *)
   | letter (letter | digit)*     { return ID }       (* identificador: abc, x1  *)
   | '+'                          { return PLUS }
   | '-'                          { return MINUS }
