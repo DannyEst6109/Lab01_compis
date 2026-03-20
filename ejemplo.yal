@@ -1,0 +1,52 @@
+(* ══════════════════════════════════════════════════════════ *)
+(* ejemplo.yal                                                 *)
+(* Analizador léxico para expresiones aritméticas simples      *)
+(* UVG — CC3071 Diseño de Lenguajes de Programación            *)
+(*                                                             *)
+(* Este archivo es para probar el YALexParser.                 *)
+(* Ejercita: comentarios, header, lets con rangos,             *)
+(* lets usando otros lets, y reglas con varias formas.         *)
+(* ══════════════════════════════════════════════════════════ *)
+
+{
+(* Sección header — este contenido se copia al inicio         *)
+(* del archivo generado por el generador de analizadores.     *)
+import myToken
+}
+
+(* ─────────────────────────────────────────── *)
+(*   DEFINICIONES (let)                         *)
+(*   Expresiones de uso frecuente definidas     *)
+(*   una sola vez para reutilizarse en reglas.  *)
+(*   ORDEN IMPORTA: solo se puede usar un let   *)
+(*   si ya fue definido antes.                  *)
+(* ─────────────────────────────────────────── *)
+
+let digit  = ['0'-'9']
+let lower  = ['a'-'z']
+let upper  = ['A'-'Z']
+let letter = lower | upper
+let ws     = [' ' '\t']
+
+(* ─────────────────────────────────────────── *)
+(*   REGLAS LÉXICAS (rule)                      *)
+(*   Cada línea: regex { acción }               *)
+(*   El ORDEN determina la prioridad:           *)
+(*   si dos reglas empatan en longitud,         *)
+(*   gana la que aparece primero.               *)
+(* ─────────────────────────────────────────── *)
+
+rule gettoken =
+    ws+                          { return None }     (* ignorar espacios y tabs *)
+  | ['\n']                       { return EOL }      (* fin de línea → token EOL *)
+  | digit+                       { return INT }      (* entero:     42, 100, 007 *)
+  | digit+ '.' digit+            { return FLOAT }    (* flotante:   3.14, 0.5   *)
+  | letter (letter | digit)*     { return ID }       (* identificador: abc, x1  *)
+  | '+'                          { return PLUS }
+  | '-'                          { return MINUS }
+  | '*'                          { return TIMES }
+  | '/'                          { return DIV }
+  | '('                          { return LPAREN }
+  | ')'                          { return RPAREN }
+  | '='                          { return ASSIGN }
+  | eof                          { return EOF }
