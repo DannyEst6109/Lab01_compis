@@ -18,7 +18,7 @@ class YALexParser:
     
     # Operadores del formato interno de Lab 01.
     # Si uno de estos aparece como literal en el .yal, se escapa con \\.
-    OPERATORS = set('|*+?()')
+    OPERATORS = set('|*+?().')
 
     def __init__(self):
         self.header      = ""

@@ -188,3 +188,83 @@ Extrae el nombre del token de la cadena de acción.
             "return None"       → None         skip
             "raise(...)"        → "EOF"        fin de buffer
             ""                  → None         acción vacía → ignorar
+
+
+------------------------------------------------------------------------
+FILOSOFÍA DE DISEÑO — el truco de los marcadores
+─────────────────────────────────────────────────
+El Lab 01 construye AFDs para UNA regex con UN marcador de fin: '#'.
+Para múltiples tokens necesitamos UN marcador por token.
+
+La clave es que el marcador '#' en el método directo NO es un carácter
+que se "lee" del input. Es una posición en el árbol sintáctico.
+Cuando un estado del AFD contiene esa posición en su conjunto, es
+estado de aceptación. El '#' se excluye del alfabeto → no hay transición.
+
+Aplicamos la misma idea con marcadores únicos por token:
+  - Token INT  → marcador chr(0xE100)   no en alfabeto
+  - Token ID   → marcador chr(0xE101)   no en alfabeto
+  - Token PLUS → marcador chr(0xE102)   no en alfabeto
+
+Regex combinada:  ( (digit+)Mint | (letter+)Mid | (\+)Mplus ) #
+
+Un estado que contenga pos(Mint)  acepta INT.
+Un estado que contenga pos(Mid)   acepta ID.
+Ese estado TAMBIÉN puede tener transiciones en chars reales → longest match ✓
+
+USO
+───
+    from yalex_parser import YALexParser
+    from lexer_generator import build_lexer, print_multi_dfa
+
+    rules  = YALexParser().parse("ejemplo.yal").get_all_rules()
+    result = build_lexer(rules)
+    print_multi_dfa(result)
+
+    # result["accepting_tokens"]["S3"] → "INT"
+    # result["transitions"]["S0"]["a"]  → "S1"
+    # result["user_alphabet"]           → chars reales del input
+
+
+def _build_multi_dfa(root, followpos, pos_to_symbol, dfa_alphabet, marker_positions):
+    """
+    ¿
+
+    Parámetros:
+        root             : raíz del árbol sintáctico (SyntaxNode)
+        followpos        : {pos: set(pos)}
+        pos_to_symbol    : {pos: char}   (incluye marcadores)
+        dfa_alphabet     : [char]        (solo chars reales, sin marcadores)
+        marker_positions : {pos: (token_name, prioridad)}
+
+    Retorna:
+        named_states     : [(nombre, set_posiciones), ...]
+        transitions      : {nombre: {char: nombre_destino | "-"}}
+        accepting_states : set(nombres)
+        accepting_tokens : {nombre: token_name | None}
+                           None = regla de skip (ignorar, no emitir token)
+
+
+#  API PÚBLICA — build_lexer: rules → AFD multi-token.
+def build_lexer(rules: list, minimize: bool = True, verbose: bool = True) -> dict:
+    """
+   
+    Parámetros:
+        rules    : lista de (regex_expandida, token_name | None, prioridad)
+                   Usar YALexParser.get_all_rules() para incluir también
+                   las reglas de skip (token=None, ej. whitespace).
+        minimize : True  → aplica minimización multi-token
+                   False → retorna AFD directo sin minimizar
+        verbose  : True  → imprime progreso y estadísticas
+
+    Retorna dict con:
+        "states"          [(nombre, set_pos), ...]
+        "transitions"     {nombre: {char: nombre | "-"}}
+        "accepting_states" set(nombres)
+        "accepting_tokens" {nombre: token_name | None}
+                           None = regla skip (avanzar sin emitir token)
+        "alphabet"        lista de chars del alfabeto (con placeholders)
+        "user_alphabet"   misma lista pero chars ilegibles → char real
+        "display_map"     {char_interno: char_para_mostrar}
+        "n_rules"         int — número de reglas combinadas
+    """
