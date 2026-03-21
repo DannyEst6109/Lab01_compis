@@ -76,6 +76,7 @@ class YALexParser:
         return [
             (r["regex"], r["token"], r["priority"], r["action"])
             for r in self.rules
+            
         ]
     
     #Imprime un resumen legible del resultado del parseo.
@@ -596,6 +597,9 @@ class YALexParser:
     
         a = action.strip()
 
+        if not a:
+            return None
+
         if a.startswith('return '):
             tok = a[7:].strip()
             if tok in ('lexbuf', 'None', 'null', ''):
@@ -605,7 +609,17 @@ class YALexParser:
         if 'raise' in a:
             return 'EOF'
 
-        return None   # acción vacía o no reconocida → ignorar
+        # Problema: con None como token para TODAS las acciones tipo
+        # print(...), Hopcroft mete todos los estados aceptantes en la
+        # MISMA partición inicial (todos con key=None).
+        # Resultado: '+', '*' y '=' se fusionan en un solo estado y el
+        # lexer ejecuta la acción incorrecta (ej: '*' dispara print de '=').
+        #
+        # Solución: devolver un ID único por acción distinta.
+        # hash(a) garantiza que la misma acción → mismo grupo,
+        # y acciones distintas → grupos distintos → no se fusionan.
+        # El lexer generado detecta "__exec__" y usa ex
+        return f"__exec__{abs(hash(a))}"
 
 
 

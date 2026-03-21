@@ -299,9 +299,9 @@ def build_lexer(rules: list, minimize: bool = True, verbose: bool = True) -> dic
                   f"(se maneja en el lexer directamente)")
 
     if verbose:
-        print(f"\n{'═'*56}")
+        print(f"\n{'-'*56}")
         print(f"  BUILD LEXER — {len(active_rules)} regla(s)")
-        print(f"{'═'*56}")
+        print(f"{'-'*56}")
 
     # Regex combinada con marcadores 
     combined_str, mk_tokens = _build_combined(active_rules)
@@ -462,9 +462,14 @@ def build_dfa_dict(rules: list, parser=None,
     # Accepting states: tupla → dict con priority/token/action
     new_accepting = {}
     for sname, (token, priority, action) in accepting_toks.items():
+        clean_token = None if (
+            token is None or
+            (isinstance(token, str) and token.startswith("__exec__"))
+        ) else token
+
         new_accepting[_state_int(sname)] = {
             "priority": priority,
-            "token":    token,              # puede ser None (skip)
+            "token":    clean_token,              # puede ser None (skip)
             "action":   action.strip(),
         }
  
@@ -553,6 +558,8 @@ def summary(result: dict):
         # CAMBIO: extraer token de la tupla.
         # ANTES:  tok = tok  (era directamente el string)
         tok = tok_tuple[0]
+        if tok and tok.startswith("__exec__"):
+            tok = "(exec)"
     
         lbl = tok if tok is not None else "(skip/ignorar)"
         if lbl not in seen:
