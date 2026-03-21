@@ -1,5 +1,9 @@
 #main 2 
-from thelexer import gettoken
+from thelexer import tokens
 
-tokens = gettoken("x = 7 + 3.14")
-print(tokens)
+check_input = """var @ -4
+2var 1
+"""
+
+tokensu = tokens(check_input)
+print(tokensu)
