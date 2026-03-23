@@ -77,6 +77,13 @@ El programa ofrece dos modos:
 1. **Interactivo**: ingresas una expresión y una cadena.
 2. **Demo**: ejecuta 3 casos listos para mostrar en video (aceptada y rechazada por cada ER).
 
+--- 
+## Proyecto en terminal
+Primero, ejecutar lexer-inador.py, colocando la ruta del .yal al que se quiere analizar su léxico. 
+La verificación de cadenas se ejecuta como `python3 run_thelexer.py mini_example_T.txt` en la terminal. Tomando en cuenta cual es el que se quiere probar. 
+* calc.yal -> calc_example_F.txt / calc_example_T.txt
+* lang.yal -> lang_example_T.txt / lang_example_F.txt
+* minipython.yal -> mini_example_T.txt / mini_example_F.txt
 
 ---
 ## Requisitos

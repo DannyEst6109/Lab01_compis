@@ -18,7 +18,7 @@ class YALexParser:
     
     # Operadores del formato interno de Lab 01.
     # Si uno de estos aparece como literal en el .yal, se escapa con \\.
-    OPERATORS = set('|*+?().')
+    OPERATORS = set('|*+?().#')
 
     def __init__(self):
         self.header      = ""
@@ -284,7 +284,7 @@ class YALexParser:
                 elif len(chars) == 1:
                     out.append(chars[0])
                 else:
-                    out.append('(' + '|'.join(chars) + ')')
+                    out.append(''.join(chars))
                 i += skip
 
             # Conjunto de caracteres: [...] → (a|b|c|...) 
@@ -402,9 +402,13 @@ class YALexParser:
             return ''
 
         if negated:
-            # Placeholder para charset negado
-            # Lab 01 debe implementar el soporte para [^...]
-            return '[^' + ''.join(chars) + ']'
+            excluded = set(chars)
+            all_chars = [chr(c) for c in range(32, 127)]  # ASCII imprimible
+            included = [self._esc(c) for c in all_chars 
+                        if self._esc(c) not in excluded and c not in excluded]
+            if len(included) == 1:
+                return included[0]
+            return '(' + '|'.join(included) + ')'
 
         if len(chars) == 1:
             return chars[0]   # un solo char: no necesita paréntesis
