@@ -1,0 +1,9 @@
+x = 3.14
+if (x > 2) {
+    y = x * 10
+    return y
+}
+// esto es un comentario
+while (x != 0) {
+    x = x - 1
+}

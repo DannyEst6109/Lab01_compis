@@ -1,0 +1,14 @@
+(* Analizador léxico para una calculadora simple *)
+
+let digito = ['0'-'9']
+let espacio = [' ' '\t' '\n']
+
+rule tokens =
+    espacio+        { }
+  | digito+         { print("ENTERO: " + lxm) }
+  | '+'             { print("SUMA") }
+  | '-'             { print("RESTA") }
+  | '*'             { print("MULT") }
+  | '/'             { print("DIV") }
+  | '('             { print("LPAREN") }
+  | ')'             { print("RPAREN") }

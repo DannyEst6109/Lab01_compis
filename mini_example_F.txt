@@ -1,0 +1,4 @@
+def foo(x):
+    y = x @ 2
+    z = "hola" + $var
+    return y
