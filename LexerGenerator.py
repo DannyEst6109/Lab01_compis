@@ -555,8 +555,7 @@ def summary(result: dict):
     print(f"\n  Tokens reconocidos:")
     seen = set()
     for tok_tuple in result["accepting_tokens"].values():
-        # CAMBIO: extraer token de la tupla.
-        # ANTES:  tok = tok  (era directamente el string)
+        
         tok = tok_tuple[0]
         if tok and tok.startswith("__exec__"):
             tok = "(exec)"

@@ -1,5 +1,5 @@
 """
-lexer_generator.py
+lexer_generator_yalex.py
 ==================
 Generador de analizadores léxicos para YALex.
 

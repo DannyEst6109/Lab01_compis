@@ -13,7 +13,7 @@ import tkinter as tk
 
 from LexerGenerator import build_dfa_dict, build_lexer
 from ParserYal import YALexParser
-from lexer_generator import generate_lexer, generate_token_module
+from lexer_generator_yalex import generate_lexer, generate_token_module
 
 
 class LexerInadorGUI:
@@ -23,8 +23,8 @@ class LexerInadorGUI:
         self.root.geometry("1320x800")
         self.root.minsize(1120, 700)
 
-        self.yal_path = tk.StringVar(value="minipython.yal")
-        self.input_path = tk.StringVar(value="mini_example_T.txt")
+        self.yal_path = tk.StringVar(value="./EjemplosProyecto/minipython.yal")
+        self.input_path = tk.StringVar(value="./EjemplosProyecto/mini_example_T.txt")
 
         self.current_dfa_dict: dict | None = None
         self.current_internal_dfa: dict | None = None

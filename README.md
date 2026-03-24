@@ -19,7 +19,7 @@ También permite simular el AFD para validar si una cadena pertenece al lenguaje
 - Simulación de cadenas sobre el AFD.
 - Modo de demostración con **3 expresiones regulares** (incluye todos los operadores requeridos).
 
-## Operadores soportados dentro del laboratorio 01
+### Operadores soportados dentro del laboratorio 01
 
 - Unión: `|`
 - Concatenación implícita
@@ -27,7 +27,7 @@ También permite simular el AFD para validar si una cadena pertenece al lenguaje
 - Cerradura positiva: `+`
 - Opcional: `?`
 
-## Ejecución laboratorio 01
+### Ejecución laboratorio 01 (dentro de la carpeta correspondiente)
 
 ```bash
 python main.py
@@ -66,7 +66,7 @@ Reducción de complejidad
 Mejora en eficiencia de reconocimiento
 Comparación entre versiones del AFD
 
-## Ejecución laboratorio 02
+### Ejecución laboratorio 02 (dentro de la carpeta correspondiente)
 
 ```bash
 python main.py
@@ -78,7 +78,21 @@ El programa ofrece dos modos:
 2. **Demo**: ejecuta 3 casos listos para mostrar en video (aceptada y rechazada por cada ER).
 
 --- 
-## Proyecto en terminal
+## Proyecto 
+
+### Descripción general
+
+El archivo main.py implementa la interfaz gráfica principal del sistema utilizando la librería tkinter. Su objetivo es permitir al usuario interactuar de manera visual con el generador de analizadores léxicos basado en YALex, facilitando tareas como:
+
+- Cargar archivos .yal y .txt
+- Generar el analizador léxico (lexer) y su AFD
+- Visualizar el autómata finito determinista (AFD)
+- Analizar cadenas de entrada y mostrar los tokens generados
+
+La interfaz centraliza todas las funcionalidades del sistema en un solo entorno interactivo.
+
+### Ejecución en terminal (opción previa a la interfáz gráfica)
+
 Primero, ejecutar lexer-inador.py, colocando la ruta del .yal al que se quiere analizar su léxico. 
 La verificación de cadenas se ejecuta como `python3 run_thelexer.py mini_example_T.txt` en la terminal. Tomando en cuenta cual es el que se quiere probar. 
 * calc.yal -> calc_example_F.txt / calc_example_T.txt
@@ -92,7 +106,7 @@ También pueden usar una interfaz gráfica integrada para generar el lexer, visu
 
 ### Ejecución GUI
 ```bash
-python3 app_gui.py
+python3 main.py
 ```
 
 ### Flujo dentro de la GUI
