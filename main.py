@@ -6,6 +6,7 @@ import importlib.util
 import io
 import math
 import os
+import tempfile
 from contextlib import redirect_stdout
 from tkinter import BOTH, END, LEFT, RIGHT, VERTICAL, X, Y, filedialog, messagebox, ttk
 import tkinter as tk
@@ -98,16 +99,68 @@ class LexerInadorGUI:
         panel = ttk.Notebook(right_frame)
         panel.pack(fill=BOTH, expand=True)
 
-        tokens_tab = ttk.Frame(panel)
+        editor_tab = ttk.Frame(panel)
         log_tab = ttk.Frame(panel)
         trans_tab = ttk.Frame(panel)
 
-        panel.add(tokens_tab, text="Tokens")
+        panel.add(editor_tab, text="Editor YAL / Prueba")
         panel.add(log_tab, text="Logs")
         panel.add(trans_tab, text="Transiciones")
+        # Sección superior: editor YAL con fondo oscuro tipo IDE
 
-        self.tokens_text = tk.Text(tokens_tab, wrap="word")
-        self.tokens_text.pack(fill=BOTH, expand=True)
+        editor_pane = ttk.Panedwindow(editor_tab, orient="vertical")
+        editor_pane.pack(fill=BOTH, expand=True)
+ 
+        yal_section = ttk.Frame(editor_pane)
+        editor_pane.add(yal_section, weight=3)
+ 
+        yal_toolbar = ttk.Frame(yal_section)
+        yal_toolbar.pack(fill=X, padx=4, pady=(4, 2))
+        ttk.Label(yal_toolbar, text="Contenido .yal  (escribe aquí o carga un archivo)", font=("Segoe UI", 9, "bold")).pack(side=LEFT)
+        ttk.Button(yal_toolbar, text="📂 Cargar archivo en editor", command=self._load_yal_into_editor).pack(side=RIGHT, padx=2)
+        ttk.Button(yal_toolbar, text="⚙ Generar desde editor", command=self._generate_from_editor).pack(side=RIGHT, padx=2)
+ 
+        yal_edit_frame = ttk.Frame(yal_section)
+        yal_edit_frame.pack(fill=BOTH, expand=True, padx=4, pady=(0, 4))
+        self.yal_editor = tk.Text(
+            yal_edit_frame,
+            wrap="none",
+            font=("Consolas", 10),
+            undo=True,
+            bg="#1e1e2e",
+            fg="#cdd6f4",
+            insertbackground="#cdd6f4",
+            selectbackground="#45475a",
+        )
+        yal_scroll_y = ttk.Scrollbar(yal_edit_frame, orient=VERTICAL, command=self.yal_editor.yview)
+        yal_scroll_x = ttk.Scrollbar(yal_edit_frame, orient="horizontal", command=self.yal_editor.xview)
+        self.yal_editor.configure(yscrollcommand=yal_scroll_y.set, xscrollcommand=yal_scroll_x.set)
+        yal_scroll_y.pack(side=RIGHT, fill=Y)
+        yal_scroll_x.pack(side="bottom", fill=X)
+        self.yal_editor.pack(fill=BOTH, expand=True)
+ 
+        # Sección inferior: cadena de prueba
+        test_section = ttk.Frame(editor_pane)
+        editor_pane.add(test_section, weight=1)
+ 
+        test_toolbar = ttk.Frame(test_section)
+        test_toolbar.pack(fill=X, padx=4, pady=(6, 2))
+        ttk.Label(test_toolbar, text="Cadena de prueba  (analiza sin usar archivo .txt)", font=("Segoe UI", 9, "bold")).pack(side=LEFT)
+        ttk.Button(test_toolbar, text="▶ Analizar cadena", command=self._analyze_inline_string).pack(side=RIGHT, padx=2)
+ 
+        test_input_frame = ttk.Frame(test_section)
+        test_input_frame.pack(fill=X, padx=4, pady=(0, 2))
+        self.test_string_var = tk.StringVar()
+        ttk.Entry(test_input_frame, textvariable=self.test_string_var, font=("Consolas", 10)).pack(fill=X)
+ 
+        test_out_frame = ttk.Frame(test_section)
+        test_out_frame.pack(fill=BOTH, expand=True, padx=4, pady=(2, 4))
+        self.test_output = tk.Text(test_out_frame, wrap="word", font=("Consolas", 9), height=6, state="disabled")
+        test_out_scroll = ttk.Scrollbar(test_out_frame, orient=VERTICAL, command=self.test_output.yview)
+        self.test_output.configure(yscrollcommand=test_out_scroll.set)
+        test_out_scroll.pack(side=RIGHT, fill=Y)
+        self.test_output.pack(fill=BOTH, expand=True)
+        
 
         self.logs_text = tk.Text(log_tab, wrap="word")
         self.logs_text.pack(fill=BOTH, expand=True)
@@ -153,11 +206,77 @@ class LexerInadorGUI:
 
     def clear_panels(self) -> None:
         self.logs_text.delete("1.0", END)
-        self.tokens_text.delete("1.0", END)
+
+        self.yal_editor.delete("1.0", END)
+        self.test_string_var.set("")
+        self.test_output.configure(state="normal")
+        self.test_output.delete("1.0", END)
+        self.test_output.configure(state="disabled")
         for row in self.trans_tree.get_children():
             self.trans_tree.delete(row)
         self.canvas.delete("all")
         self.status_var.set("Paneles limpiados.")
+
+    def _load_yal_into_editor(self) -> None:
+        """Carga el archivo .yal indicado en la ruta superior dentro del editor."""
+        yal_file = self.yal_path.get().strip()
+        if not yal_file or not os.path.exists(yal_file):
+            messagebox.showerror("Error", "No se encontró el archivo .yal indicado en la ruta.")
+            return
+        with open(yal_file, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.yal_editor.delete("1.0", END)
+        self.yal_editor.insert("1.0", content)
+        self._append_log(f"📂 Archivo cargado en editor: {yal_file}")
+ 
+    def _generate_from_editor(self) -> None:
+        """Guarda el contenido del editor en un .yal temporal y lanza el flujo normal."""
+        content = self.yal_editor.get("1.0", END).strip()
+        if not content:
+            messagebox.showwarning("Editor vacío", "Escribe o carga contenido YAL en el editor primero.")
+            return
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yal", delete=False, encoding="utf-8") as tmp:
+            tmp.write(content)
+            tmp_path = tmp.name
+        self.yal_path.set(tmp_path)
+        self.generate_lexer_and_dfa()
+ 
+    def _analyze_inline_string(self) -> None:
+        """Analiza la cadena del campo de prueba con el lexer ya generado."""
+        cadena = self.test_string_var.get()
+        if not cadena:
+            messagebox.showwarning("Campo vacío", "Escribe una cadena de prueba primero.")
+            return
+        if self.current_dfa_dict is None:
+            messagebox.showwarning("Atención", "Primero genera el lexer con el archivo .yal.")
+            return
+        try:
+            spec = importlib.util.spec_from_file_location("thelexer_runtime", "thelexer.py")
+            if spec is None or spec.loader is None:
+                raise RuntimeError("No fue posible cargar thelexer.py")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            entrypoint = self.current_dfa_dict["entrypoint"]
+            lexer_fn = getattr(module, entrypoint)
+ 
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                tokens = lexer_fn(cadena)
+            console = buf.getvalue()
+ 
+            self.test_output.configure(state="normal")
+            self.test_output.delete("1.0", END)
+            self.test_output.insert(END, f"Cadena: {cadena!r}\n\n")
+            for i, tok in enumerate(tokens, start=1):
+                self.test_output.insert(END, f"{i:>3}. {tok}\n")
+            if console.strip():
+                self.test_output.insert(END, f"\n--- stdout ---\n{console.rstrip()}\n")
+            self.test_output.configure(state="disabled")
+ 
+            self._append_log(f"✅ Cadena analizada — {len(tokens)} token(s) reconocido(s).")
+        except Exception as exc:
+            self._append_log(f"❌ Error al analizar cadena: {exc}")
+            messagebox.showerror("Error", str(exc))
 
     def generate_lexer_and_dfa(self) -> None:
         yal_file = self.yal_path.get().strip()
@@ -166,7 +285,6 @@ class LexerInadorGUI:
             return
 
         self.logs_text.delete("1.0", END)
-        self.tokens_text.delete("1.0", END)
         self._append_log(f"▶ Parseando {yal_file}")
 
         try:
@@ -318,13 +436,12 @@ class LexerInadorGUI:
                 tokens = lexer_fn(content)
             console = buf.getvalue()
 
-            self.tokens_text.delete("1.0", END)
-            self.tokens_text.insert(END, f"Archivo: {txt_file}\n\n")
-            self.tokens_text.insert(END, "Tokens reconocidos:\n")
+            self._append_log(f"▶ Entrada analizada: {txt_file}\n")
+            self._append_log("Tokens reconocidos:")
             for i, tok in enumerate(tokens, start=1):
-                self.tokens_text.insert(END, f"{i:>3}. {tok}\n")
+                self._append_log(f"   {i:>3}. {tok}")
 
-            self._append_log(f"▶ Entrada analizada: {txt_file}")
+         
             if console.strip():
                 self._append_log("Salida de acciones/errores:")
                 self._append_log(console.rstrip())
