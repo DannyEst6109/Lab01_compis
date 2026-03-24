@@ -105,6 +105,7 @@ La GUI:
 - Genera `myToken.py` y `thelexer.py` automáticamente.
 - Dibuja el autómata finito determinista minimizado.
 - Muestra tabla de transiciones, tokens detectados y errores léxicos.
+- Resalta en verde los estados de aceptación en el diagrama y en la tabla de transiciones.
 
 ## Requisitos
 
