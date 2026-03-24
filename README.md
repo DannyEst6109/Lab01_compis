@@ -106,6 +106,7 @@ La GUI:
 - Dibuja el autómata finito determinista minimizado.
 - Muestra tabla de transiciones, tokens detectados y errores léxicos.
 - Resalta en verde los estados de aceptación en el diagrama y en la tabla de transiciones.
+- Si una regla del `.yal` solo hace `print(...)` (sin `return`), la pestaña **Tokens** mostrará esas acciones detectadas para que no aparezca vacía.
 
 ## Requisitos
 
