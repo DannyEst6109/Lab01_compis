@@ -34,15 +34,12 @@ class LexerInadorGUI:
     def _configure_styles(self) -> None:
         style = ttk.Style()
         style.theme_use("clam")
-        style.configure("Title.TLabel", font=("Segoe UI", 17, "bold"), foreground="#0f172a")
-        style.configure("Subtitle.TLabel", font=("Segoe UI", 10), foreground="#475569")
+        style.configure("Title.TLabel", font=("Segoe UI", 17, "bold"))
+        style.configure("Subtitle.TLabel", font=("Segoe UI", 10), foreground="#4a4a4a")
         style.configure("Primary.TButton", font=("Segoe UI", 10, "bold"), padding=8)
         style.configure("TButton", padding=6)
-        style.configure("Header.TFrame", background="#eef4ff")
-        style.configure("Body.TFrame", background="#f8fafc")
-        style.configure("Status.TLabel", font=("Segoe UI", 9), foreground="#334155")
-        style.configure("Section.TLabel", font=("Segoe UI", 11, "bold"), foreground="#1e293b")
-        style.configure("Card.TFrame", background="#ffffff")
+        style.configure("Header.TFrame", background="#f4f7fb")
+        style.configure("Status.TLabel", font=("Segoe UI", 9), foreground="#333")
 
     def _build_layout(self) -> None:
         header = ttk.Frame(self.root, style="Header.TFrame", padding=(14, 12))
@@ -89,12 +86,12 @@ class LexerInadorGUI:
         main = ttk.Panedwindow(self.root, orient="horizontal")
         main.pack(fill=BOTH, expand=True, padx=10, pady=(0, 10))
 
-        left_frame = ttk.Frame(main, style="Body.TFrame")
-        right_frame = ttk.Frame(main, style="Body.TFrame")
+        left_frame = ttk.Frame(main)
+        right_frame = ttk.Frame(main)
         main.add(left_frame, weight=2)
         main.add(right_frame, weight=3)
 
-        ttk.Label(left_frame, text="Diagrama del AFD (minimizado)", style="Section.TLabel").pack(anchor="w", padx=8, pady=(6, 2))
+        ttk.Label(left_frame, text="Diagrama del AFD (minimizado)", font=("Segoe UI", 11, "bold")).pack(anchor="w", padx=8, pady=(6, 2))
         self.canvas = tk.Canvas(left_frame, bg="#fbfcfe", width=520, height=620, highlightthickness=1, highlightbackground="#dde4ef")
         self.canvas.pack(fill=BOTH, expand=True, padx=5, pady=5)
 
@@ -109,9 +106,11 @@ class LexerInadorGUI:
         panel.add(log_tab, text="Logs")
         panel.add(trans_tab, text="Transiciones")
 
-        self.tokens_text = self._build_text_area(tokens_tab)
+        self.tokens_text = tk.Text(tokens_tab, wrap="word")
+        self.tokens_text.pack(fill=BOTH, expand=True)
 
-        self.logs_text = self._build_text_area(log_tab)
+        self.logs_text = tk.Text(log_tab, wrap="word")
+        self.logs_text.pack(fill=BOTH, expand=True)
 
         trans_container = ttk.Frame(trans_tab)
         trans_container.pack(fill=BOTH, expand=True)
@@ -136,25 +135,6 @@ class LexerInadorGUI:
         self.status_var = tk.StringVar(value="Listo.")
         status = ttk.Label(self.root, textvariable=self.status_var, style="Status.TLabel", anchor="w", padding=(10, 5))
         status.pack(fill=X, side="bottom")
-
-    def _build_text_area(self, parent: ttk.Frame) -> tk.Text:
-        wrapper = ttk.Frame(parent, style="Card.TFrame", padding=6)
-        wrapper.pack(fill=BOTH, expand=True, padx=6, pady=6)
-        text = tk.Text(
-            wrapper,
-            wrap="word",
-            bg="#ffffff",
-            fg="#0f172a",
-            font=("Consolas", 10),
-            relief="flat",
-            padx=10,
-            pady=8,
-        )
-        yscroll = ttk.Scrollbar(wrapper, orient=VERTICAL, command=text.yview)
-        text.configure(yscrollcommand=yscroll.set)
-        text.pack(side=LEFT, fill=BOTH, expand=True)
-        yscroll.pack(side=RIGHT, fill=Y)
-        return text
 
     def _pick_yal(self) -> None:
         file_path = filedialog.askopenfilename(title="Selecciona archivo YAL", filetypes=[("YALex", "*.yal"), ("Todos", "*.*")])
@@ -341,36 +321,14 @@ class LexerInadorGUI:
             self.tokens_text.delete("1.0", END)
             self.tokens_text.insert(END, f"Archivo: {txt_file}\n\n")
             self.tokens_text.insert(END, "Tokens reconocidos:\n")
-
-            raw_lines = [ln.strip() for ln in console.splitlines() if ln.strip()]
-            error_lines = [ln for ln in raw_lines if "Error léxico" in ln]
-            action_lines = [ln for ln in raw_lines if "Error léxico" not in ln]
-
-            shown_count = 0
-            if tokens:
-                for i, tok in enumerate(tokens, start=1):
-                    self.tokens_text.insert(END, f"{i:>3}. {tok}\n")
-                shown_count = len(tokens)
-            elif action_lines:
-                self.tokens_text.insert(
-                    END,
-                    "  (El lexer no devolvió tuplas; se muestran acciones detectadas)\n",
-                )
-                for i, ln in enumerate(action_lines, start=1):
-                    self.tokens_text.insert(END, f"{i:>3}. {ln}\n")
-                shown_count = len(action_lines)
-            else:
-                self.tokens_text.insert(END, "  (No se detectaron tokens)\n")
+            for i, tok in enumerate(tokens, start=1):
+                self.tokens_text.insert(END, f"{i:>3}. {tok}\n")
 
             self._append_log(f"▶ Entrada analizada: {txt_file}")
-            if error_lines:
-                self._append_log("Errores léxicos detectados:")
-                self._append_log("\n".join(error_lines))
-            if action_lines and not tokens:
-                self._append_log(
-                    "ℹ️ El lexer ejecuta acciones con print() y no retorna tokens estructurados."
-                )
-            self._append_log(f"✅ Total mostrado en pestaña Tokens: {shown_count}")
+            if console.strip():
+                self._append_log("Salida de acciones/errores:")
+                self._append_log(console.rstrip())
+            self._append_log(f"✅ Total de tokens reconocidos: {len(tokens)}")
         except Exception as exc:
             self._append_log(f"❌ Error al ejecutar thelexer.py: {exc}")
             messagebox.showerror("Error", str(exc))
