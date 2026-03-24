@@ -86,6 +86,27 @@ La verificación de cadenas se ejecuta como `python3 run_thelexer.py mini_exampl
 * minipython.yal -> mini_example_T.txt / mini_example_F.txt
 
 ---
+
+## Interfaz gráfica (producto terminado)
+También pueden usar una interfaz gráfica integrada para generar el lexer, visualizar el AFD y analizar archivos de entrada sin editar rutas manualmente.
+
+### Ejecución GUI
+```bash
+python3 app_gui.py
+```
+
+### Flujo dentro de la GUI
+1. Seleccionar archivo `.yal` (receta de tokens).
+2. Seleccionar archivo `.txt` (entrada a analizar).
+3. Clic en **"1) Generar lexer + AFD"**.
+4. Clic en **"2) Analizar entrada"**.
+
+La GUI:
+- Genera `myToken.py` y `thelexer.py` automáticamente.
+- Dibuja el autómata finito determinista minimizado.
+- Muestra tabla de transiciones, tokens detectados y errores léxicos.
+- Resalta en verde los estados de aceptación en el diagrama y en la tabla de transiciones.
+
 ## Requisitos
 
 - Python 3.10+
