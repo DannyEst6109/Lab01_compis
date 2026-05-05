@@ -23,8 +23,8 @@ class LexerInadorGUI:
         self.root.geometry("1320x800")
         self.root.minsize(1120, 700)
 
-        self.yal_path = tk.StringVar(value="./EjemplosProyecto/minipython.yal")
-        self.input_path = tk.StringVar(value="./EjemplosProyecto/mini_example_T.txt")
+        self.yal_path = tk.StringVar(value="./Proyecto1/EjemplosProyecto/minipython.yal")
+        self.input_path = tk.StringVar(value="./Proyecto1/EjemplosProyecto/mini_example_T.txt")
 
         self.current_dfa_dict: dict | None = None
         self.current_internal_dfa: dict | None = None
@@ -251,7 +251,7 @@ class LexerInadorGUI:
             messagebox.showwarning("Atención", "Primero genera el lexer con el archivo .yal.")
             return
         try:
-            spec = importlib.util.spec_from_file_location("thelexer_runtime", "thelexer.py")
+            spec = importlib.util.spec_from_file_location("thelexer_runtime", "Proyecto1/thelexer.py")
             if spec is None or spec.loader is None:
                 raise RuntimeError("No fue posible cargar thelexer.py")
             module = importlib.util.module_from_spec(spec)
@@ -294,8 +294,8 @@ class LexerInadorGUI:
             self.current_dfa_dict = build_dfa_dict(rules, parser=parser, minimize=True, verbose=True)
             self.current_internal_dfa = build_lexer(rules, minimize=True, verbose=False)
 
-            generate_token_module(self.current_dfa_dict, "myToken.py")
-            generate_lexer(self.current_dfa_dict, output_path="thelexer.py")
+            generate_token_module(self.current_dfa_dict, "Proyecto1/myToken.py")
+            generate_lexer(self.current_dfa_dict, output_path="Proyecto1/thelexer.py")
 
             self._fill_transition_table(self.current_dfa_dict)
             self._draw_dfa(self.current_dfa_dict)
@@ -422,7 +422,7 @@ class LexerInadorGUI:
             content = f.read()
 
         try:
-            spec = importlib.util.spec_from_file_location("thelexer_runtime", "thelexer.py")
+            spec = importlib.util.spec_from_file_location("thelexer_runtime", "Proyecto1/thelexer.py")
             if spec is None or spec.loader is None:
                 raise RuntimeError("No fue posible cargar thelexer.py")
 

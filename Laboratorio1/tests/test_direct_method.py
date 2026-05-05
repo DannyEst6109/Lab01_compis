@@ -1,7 +1,15 @@
 import unittest
+import sys
+import os
 
-from main import compile_regex
-from src.simulator import simulate_dfa
+
+#importar Lab 01 y Lab 02 sin modificarlos
+_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+sys.path.insert(0, _root)
+
+
+from Laboratorio1.main import compile_regex
+from Laboratorio1.src.simulator import simulate_dfa
 
 
 class DirectMethodTests(unittest.TestCase):

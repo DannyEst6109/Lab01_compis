@@ -3,8 +3,8 @@ from ParserYal import YALexParser
 from LexerGenerator import build_dfa_dict
 from lexer_generator_yalex import generate_token_module, generate_lexer
 
-parser = YALexParser().parse("minipython.yal")
+parser = YALexParser().parse("Proyecto1/EjemplosProyecto/minipython.yal")
 dfa_dict = build_dfa_dict(parser.get_all_rules(), parser=parser)
 
-generate_token_module(dfa_dict, "myToken.py")
-generate_lexer(dfa_dict,output_path="thelexer.py")
+generate_token_module(dfa_dict, "Proyecto1/myToken.py")
+generate_lexer(dfa_dict,output_path="Proyecto1/thelexer.py")
