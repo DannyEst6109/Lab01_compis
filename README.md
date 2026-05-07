@@ -1,127 +1,156 @@
-# Proyecto 1 - Diseño de lenguajes de programación
-Este proyecto está conformado por varios laboratorios, estos se encuentran dentro de las carpetas corresponientes al nombre del laboratorio.
-
-## Laboratorio 01 - Conversión directa de ER a AFD
-
-Proyecto en Python que implementa el método directo para construir un Autómata Finito Determinista (AFD) a partir de una expresión regular, sin pasar por AFN.
-
-También permite simular el AFD para validar si una cadena pertenece al lenguaje.
-
-### Funcionalidades del laboratorio 01
-
-- Ingreso de expresión regular.
-- Construcción del árbol sintáctico.
-- Cálculo de `nullable`, `firstpos`, `lastpos` y `followpos`.
-- Construcción de estados y transiciones del AFD.
-- Impresión de:
-  - tabla `followpos`
-  - tabla de transición del AFD
-- Simulación de cadenas sobre el AFD.
-- Modo de demostración con **3 expresiones regulares** (incluye todos los operadores requeridos).
-
-### Operadores soportados dentro del laboratorio 01
-
-- Unión: `|`
-- Concatenación implícita
-- Cerradura de Kleene: `*`
-- Cerradura positiva: `+`
-- Opcional: `?`
-
-### Ejecución laboratorio 01 (dentro de la carpeta correspondiente)
-
-```bash
-python main.py
-```
-
-El programa ofrece dos modos:
-
-1. **Interactivo**: ingresas una expresión y una cadena.
-2. **Demo**: ejecuta 3 casos listos para mostrar en video (aceptada y rechazada por cada ER).
-
----
-## Laboratorio 02
-Este laboratorio consiste en extender la funcionalidad desarrollada en el Laboratorio 01 (construcción de AFD a partir de expresiones regulares mediante el método directo) para implementar el algoritmo de minimización de autómatas finitos deterministas (AFD).
-
-El objetivo principal es optimizar el autómata generado, reduciendo el número de estados sin alterar el lenguaje que reconoce
-
-
-### Funcionalidades del laboratorio 02
-
-El programa desarrollado permite:
-- Ingresar una expresión regular. 
-- Construir el AFD usando el método directo.
-- Generar la tabla de transición del AFD original.
-- Aplicar el algoritmo de minimización.
-- Generar la tabla de transición del AFD minimizado.
-- Mostrar:
-    Número de estados (original vs minimizado)
-    Número de transiciones (original vs minimizado)
-- Ingresar una cadena de prueba.
-- Determinar si la cadena Pertenece o no al lenguaje
-
-### Mejoras respecto al Laboratorio 01
-
-Se añade la optimización del autómata
-Reducción de complejidad
-Mejora en eficiencia de reconocimiento
-Comparación entre versiones del AFD
-
-### Ejecución laboratorio 02 (dentro de la carpeta correspondiente)
-
-```bash
-python main.py
-```
-
-El programa ofrece dos modos:
-
-1. **Interactivo**: ingresas una expresión y una cadena.
-2. **Demo**: ejecuta 3 casos listos para mostrar en video (aceptada y rechazada por cada ER).
-
---- 
-## Proyecto 
-
-### Descripción general
-
-El archivo main.py implementa la interfaz gráfica principal del sistema utilizando la librería tkinter. Su objetivo es permitir al usuario interactuar de manera visual con el generador de analizadores léxicos basado en YALex, facilitando tareas como:
-
-- Cargar archivos .yal y .txt
-- Generar el analizador léxico (lexer) y su AFD
-- Visualizar el autómata finito determinista (AFD)
-- Analizar cadenas de entrada y mostrar los tokens generados
-
-La interfaz centraliza todas las funcionalidades del sistema en un solo entorno interactivo.
-
-### Ejecución en terminal (opción previa a la interfáz gráfica)
-
-Primero, ejecutar lexer-inador.py, colocando la ruta del .yal al que se quiere analizar su léxico. 
-La verificación de cadenas se ejecuta como `python3 run_thelexer.py mini_example_T.txt` en la terminal. Tomando en cuenta cual es el que se quiere probar. 
-* calc.yal -> calc_example_F.txt / calc_example_T.txt
-* lang.yal -> lang_example_T.txt / lang_example_F.txt
-* minipython.yal -> mini_example_T.txt / mini_example_F.txt
+# Calculadora de PRIMERO y SIGUIENTE
+## Se encuentra en la carpeta llamada Laboratorio3
+Implementación en Python de las funciones PRIMERO y SIGUIENTE para gramáticas libres de contexto, como parte del análisis sintáctico de compiladores.
 
 ---
 
-## Interfaz gráfica (producto terminado)
-También pueden usar una interfaz gráfica integrada para generar el lexer, visualizar el AFD y analizar archivos de entrada sin editar rutas manualmente.
+## Estructura del proyecto
 
-### Ejecución GUI
-```bash
-python3 main.py
+```
+📁 proyecto/
+├── main.py                  # Menú principal y punto de entrada
+├── grammar.py               # Clase Grammar (estructura de datos)
+├── first_follow.py          # Algoritmos PRIMERO y SIGUIENTE
+├── predefined_grammars.py   # Gramáticas de ejemplo listas para usar
+└── grammar_input.py         # Ingreso interactivo de gramáticas
 ```
 
-### Flujo dentro de la GUI
-1. Seleccionar archivo `.yal` (receta de tokens).
-2. Seleccionar archivo `.txt` (entrada a analizar).
-3. Clic en **"1) Generar lexer + AFD"**.
-4. Clic en **"2) Analizar entrada"**.
-
-La GUI:
-- Genera `myToken.py` y `thelexer.py` automáticamente.
-- Dibuja el autómata finito determinista minimizado.
-- Muestra tabla de transiciones, tokens detectados y errores léxicos.
-- Resalta en verde los estados de aceptación en el diagrama y en la tabla de transiciones.
-- Si una regla del `.yal` solo hace `print(...)` (sin `return`), la pestaña **Tokens** mostrará esas acciones detectadas para que no aparezca vacía.
+---
 
 ## Requisitos
 
-- Python 3.10+
+- Python 3.10 o superior
+- No requiere librerías externas
+
+---
+
+## Cómo ejecutar
+
+```bash
+python main.py
+```
+
+Al iniciar, se muestra un menú con dos opciones:
+
+```
+1. Usar una gramática predefinida
+2. Ingresar una gramática manualmente
+3. Salir
+```
+
+---
+
+## Gramáticas predefinidas
+
+| # | Nombre |
+|---|--------|
+| 1 | Expresiones aritméticas (LL(1)) |
+| 2 | Sentencias if-then-else |
+| 3 | Listas y asignaciones (con recursión izquierda) |
+| 4 | Declaraciones simples |
+| 5 | Paréntesis balanceados |
+
+---
+
+## Ingreso manual de gramáticas
+
+Al elegir la opción 2, el programa solicita los datos paso a paso:
+
+1. **Nombre** de la gramática (opcional).
+2. **No terminales** separados por comas. El primero será el símbolo inicial.
+3. **Producciones** para cada no terminal, usando `|` para separar alternativas.
+
+### Ejemplo de ingreso
+
+```
+Nombre: mi gramatica
+
+No terminales: E, T, F
+
+E → E + T | T
+T → T * F | F
+F → ( E ) | id
+```
+
+> Para representar **épsilon** use: `eps`, `epsilon` o `ε`
+
+---
+
+## Formato interno de gramáticas
+
+Las gramáticas se representan como diccionarios de Python:
+
+```python
+Grammar(
+    productions={
+        'E' : [['E', '+', 'T'], ['T']],
+        'T' : [['T', '*', 'F'], ['F']],
+        'F' : [['(', 'E', ')'], ['id']],
+    },
+    start_symbol='E',
+    name='Expresiones aritméticas'
+)
+```
+
+---
+
+## Ejemplo de salida
+
+```
+==================================================
+       Gramática: Expresiones aritméticas
+==================================================
+  Símbolo inicial : E
+  No terminales   : { E, F, T }
+  Terminales      : { (, ), *, +, id }
+  Producciones:
+    E          → E + T | T
+    T          → T * F | F
+    F          → ( E ) | id
+==================================================
+
+──────────────────────────────────────────────────
+  CONJUNTOS PRIMERO y SIGUIENTE
+──────────────────────────────────────────────────
+  No Terminal  PRIMERO               SIGUIENTE
+  ───────────  ────────────────────  ────────────────────
+  E            { (, id }             { $, ), + }
+  T            { (, id }             { $, ), *, + }
+  F            { (, id }             { $, ), *, + }
+──────────────────────────────────────────────────
+```
+
+---
+
+## Algoritmos implementados
+
+### PRIMERO
+- Si `X` es terminal → `PRIMERO(X) = { X }`
+- Si `X → ε` → `ε ∈ PRIMERO(X)`
+- Si `X → Y1 Y2 … Yk` → se agregan los PRIMERO de cada `Yi` mientras el anterior pueda derivar `ε`
+- Implementado con **recursión + memoización** para manejar gramáticas con recursión mutua.
+
+### SIGUIENTE
+- `$ ∈ SIGUIENTE(S)` (símbolo inicial)
+- Si `A → α B β` → `PRIMERO(β) − {ε} ⊆ SIGUIENTE(B)`
+- Si `ε ∈ PRIMERO(β)` o `B` está al final → `SIGUIENTE(A) ⊆ SIGUIENTE(B)`
+- Implementado con **iteración de punto fijo** hasta que ningún conjunto cambie.
+
+---
+
+## Agregar gramáticas predefinidas propias
+
+Para agregar una nueva gramática al catálogo, editar `predefined_grammars.py`:
+
+```python
+GRAMMAR_NUEVA = Grammar(
+    productions={
+        'S': [['a', 'S', 'b'], ['ε']],
+    },
+    start_symbol='S',
+    name='Mi nueva gramática'
+)
+
+# Agregar al catálogo
+PREDEFINED['6'] = GRAMMAR_NUEVA
+```

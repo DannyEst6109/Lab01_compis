@@ -7,10 +7,7 @@
 from grammar import Grammar, EPSILON
 
 
-# ======================================================================
 # PRIMERO
-# ======================================================================
-
 def first_of_symbol(X: str, grammar: Grammar, memo: dict) -> set:
     """
     Calcula PRIMERO(X) para un símbolo X.
