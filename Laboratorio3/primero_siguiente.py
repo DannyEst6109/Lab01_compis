@@ -1,10 +1,8 @@
-"""
-first_follow.py
-Implementación de los algoritmos para calcular los conjuntos
-PRIMERO (First) y SIGUIENTE (Follow) de una gramática libre de contexto.
 
-No se utilizan librerías externas para el cálculo.
-"""
+# Implementación de los algoritmos para calcular los conjuntos
+# PRIMERO (First) y SIGUIENTE (Follow) de una gramática libre de contexto.
+
+# No se utilizan librerías externas para el cálculo.
 
 from grammar import Grammar, EPSILON
 
@@ -46,12 +44,9 @@ def first_of_symbol(X: str, grammar: Grammar, memo: dict) -> set:
 
     return memo[X]
 
-
+# Calcula PRIMERO de una cadena de símbolos y lo vuelca en `target`.
+# Devuelve True si toda la cadena puede derivar ε.
 def _add_first_of_string(symbols: list, grammar: Grammar, memo: dict, target: set):
-    """
-    Calcula PRIMERO de una cadena de símbolos y lo vuelca en `target`.
-    Devuelve True si toda la cadena puede derivar ε.
-    """
     all_nullable = True
     for sym in symbols:
         if sym in grammar.terminals:
@@ -75,13 +70,9 @@ def _add_first_of_string(symbols: list, grammar: Grammar, memo: dict, target: se
         target.add(EPSILON)
     return all_nullable
 
-
+# Calcula PRIMERO para todos los no terminales de la gramática.
+# Devuelve un diccionario  { 'NO_TERMINAL': set_de_símbolos }
 def compute_first(grammar: Grammar) -> dict:
-    """
-    Calcula PRIMERO para todos los no terminales de la gramática.
-
-    Devuelve un diccionario  { 'NO_TERMINAL': set_de_símbolos }
-    """
     memo = {}
     for nt in grammar.non_terminals:
         first_of_symbol(nt, grammar, memo)
@@ -89,10 +80,8 @@ def compute_first(grammar: Grammar) -> dict:
     return {nt: memo[nt] for nt in grammar.non_terminals}
 
 
-# ======================================================================
-# SIGUIENTE
-# ======================================================================
 
+# SIGUIENTE
 def compute_follow(grammar: Grammar, first: dict) -> dict:
     """
     Calcula SIGUIENTE para todos los no terminales de la gramática.
@@ -101,8 +90,8 @@ def compute_follow(grammar: Grammar, first: dict) -> dict:
 
     Reglas aplicadas:
       1. $ ∈ SIGUIENTE(S)   (S = símbolo inicial)
-      2. A → α B β  → PRIMERO(β) − {ε} ⊆ SIGUIENTE(B)
-      3. A → α B  ó  A → α B β  con ε ∈ PRIMERO(β)
+      2. A → a B β  → PRIMERO(β) - {ε} ⊆ SIGUIENTE(B)
+      3. A → a B  ó  A → a B β  con ε ∈ PRIMERO(β)
                    → SIGUIENTE(A) ⊆ SIGUIENTE(B)
     """
     follow = {nt: set() for nt in grammar.non_terminals}
@@ -153,12 +142,9 @@ def compute_follow(grammar: Grammar, first: dict) -> dict:
 
     return follow
 
-
+# Calcula PRIMERO de una cadena de símbolos usando el diccionario
+# `first` ya computado (evita recalcular desde cero).
 def _first_of_string_using_first(symbols: list, grammar: Grammar, first: dict) -> set:
-    """
-    Calcula PRIMERO de una cadena de símbolos usando el diccionario
-    `first` ya computado (evita recalcular desde cero).
-    """
     result = set()
     all_nullable = True
 
@@ -183,12 +169,11 @@ def _first_of_string_using_first(symbols: list, grammar: Grammar, first: dict) -
     return result
 
 
-# ======================================================================
-# Función de presentación de resultados
-# ======================================================================
 
+# Función de presentación de resultados
+#Muestra los conjuntos PRIMERO y SIGUIENTE de forma alineada
 def display_results(grammar: Grammar, first: dict, follow: dict):
-    """Muestra los conjuntos PRIMERO y SIGUIENTE de forma alineada."""
+
     print(f"\n{'─'*50}")
     print("  CONJUNTOS PRIMERO y SIGUIENTE")
     print(f"{'─'*50}")

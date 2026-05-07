@@ -1,8 +1,5 @@
-"""
-grammar.py
-Definición de la clase Grammar y utilidades para manejar
-gramáticas libres de contexto.
-"""
+# Definición de la clase Grammar y utilidades para manejar
+# gramáticas libres de contexto.
 
 EPSILON = 'ε'
 
@@ -24,14 +21,11 @@ class Grammar:
         }
     """
 
+    # Parameters
+    # productions: diccionario de producciones (ver formato arriba)
+    # start_symbol: símbolo inicial (por defecto la primera clave)
+    # name: nombre descriptivo de la gramática
     def __init__(self, productions: dict, start_symbol: str = None, name: str = ""):
-        """
-        Parameters
-        ----------
-        productions  : diccionario de producciones (ver formato arriba)
-        start_symbol : símbolo inicial (por defecto la primera clave)
-        name         : nombre descriptivo de la gramática
-        """
         if not productions:
             raise ValueError("La gramática no puede estar vacía.")
 
@@ -45,10 +39,8 @@ class Grammar:
         # Los terminales son todos los símbolos que no son no terminales ni ε
         self.terminals: set = self._find_terminals()
 
-    # ------------------------------------------------------------------
+   
     # Métodos internos
-    # ------------------------------------------------------------------
-
     def _find_terminals(self) -> set:
         terminals = set()
         for prods in self.productions.values():
@@ -58,12 +50,10 @@ class Grammar:
                         terminals.add(sym)
         return terminals
 
-    # ------------------------------------------------------------------
-    # Métodos públicos
-    # ------------------------------------------------------------------
 
+    # Métodos públicos
+    # Imprime la gramática de forma legible.
     def display(self):
-        """Imprime la gramática de forma legible."""
         titulo = f" Gramática: {self.name} " if self.name else " Gramática "
         print(f"\n{'='*50}")
         print(titulo.center(50))
@@ -78,12 +68,12 @@ class Grammar:
             print(f"    {nt:10s} → {rhs}")
         print('='*50)
 
+
+    
+    # Comprueba que el símbolo inicial exista en las producciones
+    # y que toda referencia a un no terminal tenga al menos una producción.
+    # Lanza ValueError si hay inconsistencias.
     def validate(self):
-        """
-        Comprueba que el símbolo inicial exista en las producciones
-        y que toda referencia a un no terminal tenga al menos una producción.
-        Lanza ValueError si hay inconsistencias.
-        """
         if self.start_symbol not in self.productions:
             raise ValueError(
                 f"El símbolo inicial '{self.start_symbol}' no tiene producciones."

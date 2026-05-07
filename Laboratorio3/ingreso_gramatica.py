@@ -1,21 +1,14 @@
-"""
-grammar_input.py
-Módulo para ingresar gramáticas libres de contexto
-de forma interactiva desde la consola.
-"""
+# Módulo para ingresar gramáticas libres de contexto
+# de forma interactiva desde la consola.
 
 from grammar import Grammar, EPSILON
 
-
+# Convierte una línea de producción en una lista de alternativas.
+# Formato esperado:  símbolo1 símbolo2 ... | símbolo1 ...
+# Ejemplo:           "+ T E' | eps"  →  [['+', 'T', "E'"], ['ε']]
+# 'eps', 'epsilon', 'EPSILON' y 'ε' se interpretan como épsilon.
 def _parse_production(raw: str, nt: str) -> list[list[str]]:
-    """
-    Convierte una línea de producción en una lista de alternativas.
-
-    Formato esperado:  símbolo1 símbolo2 ... | símbolo1 ...
-    Ejemplo:           "+ T E' | eps"  →  [['+', 'T', "E'"], ['ε']]
-
-    'eps', 'epsilon', 'EPSILON' y 'ε' se interpretan como épsilon.
-    """
+   
     alternatives = raw.split('|')
     prods = []
     for alt in alternatives:
@@ -26,7 +19,7 @@ def _parse_production(raw: str, nt: str) -> list[list[str]]:
         # Normalizar épsilon
         normalized = []
         for sym in symbols:
-            if sym.lower() in ('eps', 'epsilon', 'ε', 'e'):
+            if sym.lower() in ('eps', 'epsilon', 'ε'):
                 normalized.append(EPSILON)
             else:
                 normalized.append(sym)
@@ -67,12 +60,13 @@ def input_grammar() -> Grammar:
     while True:
         raw_nts = input(
             "\nIngrese los no terminales separados por comas\n"
+            "El primer simbolo ingresado será tomado como el inicial"
             "(Ej: E, E', T, T', F): "
         ).strip()
         non_terminals = [nt.strip() for nt in raw_nts.split(',') if nt.strip()]
         if non_terminals:
             break
-        print("  ⚠ Debe ingresar al menos un no terminal.")
+        print(" Debe ingresar al menos un no terminal.")
 
     start_symbol = non_terminals[0]
     print(f"\n  Símbolo inicial detectado: {start_symbol}")

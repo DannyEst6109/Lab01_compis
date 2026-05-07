@@ -1,13 +1,8 @@
-"""
-predefined_grammars.py
-Colección de gramáticas libres de contexto predefinidas.
-Cada una es una instancia de Grammar lista para usar.
-"""
+# Colección de gramáticas libres de contexto predefinidas.
+# Cada una es una instancia de Grammar lista para usar.
 
 from grammar import Grammar, EPSILON
 
-
-# ──────────────────────────────────────────────────────────────────────
 # Gramática 1 – Expresiones aritméticas (con factorización izquierda)
 #
 #   E  → T E'
@@ -15,7 +10,6 @@ from grammar import Grammar, EPSILON
 #   T  → F T'
 #   T' → * F T' | ε
 #   F  → ( E ) | id
-# ──────────────────────────────────────────────────────────────────────
 GRAMMAR_EXPR = Grammar(
     productions={
         "E" : [["T", "E'"]],
@@ -28,7 +22,7 @@ GRAMMAR_EXPR = Grammar(
     name="Expresiones aritméticas (LL(1))",
 )
 
-# ──────────────────────────────────────────────────────────────────────
+
 # Gramática 2 – Sentencias if-then-else
 #
 #   S  → i E t S S' | a
@@ -36,7 +30,6 @@ GRAMMAR_EXPR = Grammar(
 #   E  → b
 #
 #   (i = if, t = then, e = else, a = assign, b = bool-expr)
-# ──────────────────────────────────────────────────────────────────────
 GRAMMAR_IF = Grammar(
     productions={
         "S" : [["i", "E", "t", "S", "S'"], ["a"]],
@@ -47,14 +40,13 @@ GRAMMAR_IF = Grammar(
     name="Sentencias if-then-else",
 )
 
-# ──────────────────────────────────────────────────────────────────────
+
 # Gramática 3 – Listas y asignaciones simples
 #
 #   P  → L
 #   L  → L ; S | S
 #   S  → id := E | id
 #   E  → E + id | id
-# ──────────────────────────────────────────────────────────────────────
 GRAMMAR_LIST = Grammar(
     productions={
         "P": [["L"]],
@@ -66,13 +58,12 @@ GRAMMAR_LIST = Grammar(
     name="Listas y asignaciones (con recursión izquierda)",
 )
 
-# ──────────────────────────────────────────────────────────────────────
+
 # Gramática 4 – Declaraciones simples
 #
 #   D  → T id L
 #   L  → , id L | ;
 #   T  → int | float
-# ──────────────────────────────────────────────────────────────────────
 GRAMMAR_DECL = Grammar(
     productions={
         "D": [["T", "id", "L"]],
@@ -83,11 +74,10 @@ GRAMMAR_DECL = Grammar(
     name="Declaraciones simples",
 )
 
-# ──────────────────────────────────────────────────────────────────────
+
 # Gramática 5 – Paréntesis balanceados con producciones anidadas
 #
 #   S → ( S ) S | ε
-# ──────────────────────────────────────────────────────────────────────
 GRAMMAR_PARENS = Grammar(
     productions={
         "S": [["(", "S", ")", "S"], [EPSILON]],
@@ -96,9 +86,8 @@ GRAMMAR_PARENS = Grammar(
     name="Paréntesis balanceados",
 )
 
-# ──────────────────────────────────────────────────────────────────────
+
 # Catálogo público  (nombre → instancia)
-# ──────────────────────────────────────────────────────────────────────
 PREDEFINED: dict[str, Grammar] = {
     "1": GRAMMAR_EXPR,
     "2": GRAMMAR_IF,
