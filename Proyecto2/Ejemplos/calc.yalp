@@ -1,0 +1,37 @@
+/* calc.yalp
+   Gramática sintáctica para una calculadora simple.
+   Corresponde a calc.yal:
+     tokens: ENTERO, SUMA, RESTA, MULT, DIV, LPAREN, RPAREN
+     espacios ignorados
+*/
+
+%token ENTERO SUMA RESTA MULT DIV LPAREN RPAREN
+
+IGNORE ESPACIO
+
+%%
+
+/* Punto de entrada: una expresión */
+programa:
+    expr
+;
+
+/* Expresión: suma y resta (menor precedencia) */
+expr:
+    expr SUMA  termino
+  | expr RESTA termino
+  | termino
+;
+
+/* Término: multiplicación y división (mayor precedencia) */
+termino:
+    termino MULT   factor
+  | termino DIV    factor
+  | factor
+;
+
+/* Factor: número o sub-expresión entre paréntesis */
+factor:
+    LPAREN expr RPAREN
+  | ENTERO
+;

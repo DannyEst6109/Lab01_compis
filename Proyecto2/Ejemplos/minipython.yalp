@@ -1,0 +1,168 @@
+/* minipython.yalp
+   Gramática sintáctica para un subconjunto de Python.
+   Corresponde a minipython.yal:
+     tokens: DEF, CLASS, IF, ELIF, ELSE, WHILE, FOR, IN,
+             RETURN, TRUE, FALSE, AND, OR, NOT, NONE,
+             FLOTANTE, ENTERO, CADENA, IDENT,
+             EQ, NEQ, LEQ, GEQ, LT, GT,
+             ASSIGN, PLUS_ASSIGN, MINUS_ASSIGN,
+             SUMA, RESTA, MULT, DIV, MOD,
+             COLON, COMMA, LPAREN, RPAREN, LBRACKET, RBRACKET
+     espacios ignorados; NEWLINE es significativo
+*/
+
+%token DEF CLASS IF ELIF ELSE WHILE FOR IN RETURN TRUE FALSE AND OR NOT NONE FLOTANTE ENTERO CADENA IDENT EQ NEQ LEQ GEQ LT GT ASSIGN PLUS_ASSIGN MINUS_ASSIGN SUMA RESTA MULT DIV MOD COLON COMMA LPAREN RPAREN LBRACKET RBRACKET NEWLINE
+
+IGNORE ESPACIO COMENTARIO
+
+%%
+
+/* Programa: secuencia de sentencias separadas por NEWLINE */
+programa:
+    programa sentencia NEWLINE
+  | sentencia NEWLINE
+;
+
+/* Sentencia: cualquier construcción válida */
+sentencia:
+    defFuncion
+  | defClase
+  | si
+  | mientras
+  | para
+  | retorno
+  | asignacion
+  | expr
+;
+
+/* Definición de función */
+defFuncion:
+    DEF IDENT LPAREN params RPAREN COLON bloque
+  | DEF IDENT LPAREN RPAREN COLON bloque
+;
+
+/* Definición de clase */
+defClase:
+    CLASS IDENT COLON bloque
+;
+
+/* Parámetros formales */
+params:
+    params COMMA IDENT
+  | IDENT
+;
+
+/* Bloque indentado (simplificado: una o más sentencias) */
+bloque:
+    programa
+;
+
+/* Sentencia if / elif / else */
+si:
+    IF expr COLON bloque ramosElif ramoElse
+  | IF expr COLON bloque ramoElse
+  | IF expr COLON bloque ramosElif
+  | IF expr COLON bloque
+;
+
+ramosElif:
+    ramosElif ELIF expr COLON bloque
+  | ELIF expr COLON bloque
+;
+
+ramoElse:
+    ELSE COLON bloque
+;
+
+/* Sentencia while */
+mientras:
+    WHILE expr COLON bloque
+;
+
+/* Sentencia for */
+para:
+    FOR IDENT IN expr COLON bloque
+;
+
+/* Sentencia return */
+retorno:
+    RETURN expr
+  | RETURN
+;
+
+/* Asignación simple y compuesta */
+asignacion:
+    IDENT ASSIGN       expr
+  | IDENT PLUS_ASSIGN  expr
+  | IDENT MINUS_ASSIGN expr
+;
+
+/* Expresión booleana */
+expr:
+    expr OR  exprAnd
+  | exprAnd
+;
+
+exprAnd:
+    exprAnd AND exprNot
+  | exprNot
+;
+
+exprNot:
+    NOT exprNot
+  | exprComp
+;
+
+/* Comparación */
+exprComp:
+    exprComp EQ  exprSuma
+  | exprComp NEQ exprSuma
+  | exprComp LEQ exprSuma
+  | exprComp GEQ exprSuma
+  | exprComp LT  exprSuma
+  | exprComp GT  exprSuma
+  | exprSuma
+;
+
+/* Suma y resta */
+exprSuma:
+    exprSuma SUMA  exprMult
+  | exprSuma RESTA exprMult
+  | exprMult
+;
+
+/* Multiplicación, división, módulo */
+exprMult:
+    exprMult MULT  factor
+  | exprMult DIV   factor
+  | exprMult MOD   factor
+  | factor
+;
+
+/* Factor: átomo, lista, sub-expresión, llamada a función */
+factor:
+    LPAREN expr RPAREN
+  | LBRACKET listaElems RBRACKET
+  | LBRACKET RBRACKET
+  | IDENT LPAREN args RPAREN
+  | IDENT LPAREN RPAREN
+  | FLOTANTE
+  | ENTERO
+  | CADENA
+  | TRUE
+  | FALSE
+  | NONE
+  | IDENT
+;
+
+/* Elementos de una lista literal */
+listaElems:
+    listaElems COMMA expr
+  | expr
+;
+
+/* Argumentos en llamada a función */
+args:
+    args COMMA expr
+  | expr
+;

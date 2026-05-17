@@ -1,0 +1,82 @@
+/* lang.yalp
+   Gramática sintáctica para un lenguaje imperativo simple.
+   Corresponde a lang.yal:
+     tokens: IF, ELSE, WHILE, RETURN,
+             FLOTANTE, ENTERO, IDENT,
+             ASSIGN, EQ, NEQ, LT, GT,
+             SUMA, RESTA, MULT,
+             SEMI, LBRACE, RBRACE, LPAREN, RPAREN
+     espacios y comentarios ignorados
+*/
+
+%token IF ELSE WHILE RETURN FLOTANTE ENTERO IDENT ASSIGN EQ NEQ LT GT SUMA RESTA MULT SEMI LBRACE RBRACE LPAREN RPAREN
+
+IGNORE ESPACIO COMENTARIO
+
+%%
+
+/* Programa: lista de declaraciones/sentencias */
+programa:
+    programa decl
+  | decl
+;
+
+/* Declaración: sentencia o estructura de control */
+decl:
+    sentencia SEMI
+  | si
+  | mientras
+;
+
+/* Sentencia simple */
+sentencia:
+    IDENT ASSIGN expr
+  | RETURN expr
+  | expr
+;
+
+/* Estructura if-else */
+si:
+    IF LPAREN condicion RPAREN bloque ELSE bloque
+  | IF LPAREN condicion RPAREN bloque
+;
+
+/* Estructura while */
+mientras:
+    WHILE LPAREN condicion RPAREN bloque
+;
+
+/* Bloque de sentencias entre llaves */
+bloque:
+    LBRACE programa RBRACE
+  | LBRACE RBRACE
+;
+
+/* Condición: comparación entre expresiones */
+condicion:
+    expr EQ  expr
+  | expr NEQ expr
+  | expr LT  expr
+  | expr GT  expr
+;
+
+/* Expresión: suma y resta */
+expr:
+    expr SUMA  termino
+  | expr RESTA termino
+  | termino
+;
+
+/* Término: multiplicación */
+termino:
+    termino MULT factor
+  | factor
+;
+
+/* Factor: literal, identificador o sub-expresión */
+factor:
+    LPAREN expr RPAREN
+  | FLOTANTE
+  | ENTERO
+  | IDENT
+;
