@@ -222,7 +222,7 @@ def build_slr_tables(automaton: LR0Automaton, grammar: Grammar) -> SLRTables:
             existing = action[key]
             if existing != new_action:
                 conflict_msg = (
-                    f"⚠ Conflicto en Estado {state_id}, símbolo '{symbol}': "
+                    f"!!! Conflicto en Estado {state_id}, símbolo '{symbol}': "
                     f"{existing} vs {new_action}"
                 )
                 if conflict_msg not in conflicts:
@@ -296,19 +296,19 @@ def build_parser(grammar: Grammar) -> Tuple[Grammar, LR0Automaton, SLRTables]:
         automaton         : LR0Automaton con todos los estados y transiciones
         tables            : SLRTables con ACTION, GOTO y lista de conflictos
     """
-    print("🔧 Aumentando gramática...")
+    print("Aumentando gramática...")
     aug_grammar = augment_grammar(grammar)
 
     print(f"   Símbolo inicial aumentado: {aug_grammar.start_symbol}")
     print(f"   Producciones totales: {len(aug_grammar.productions)}")
 
-    print("\n🔧 Construyendo autómata LR(0)...")
+    print("\nConstruyendo autómata LR(0)...")
     automaton = build_lr0_automaton(aug_grammar)
 
     print(f"   Estados generados: {len(automaton.states)}")
     print(f"   Transiciones: {len(automaton.transitions)}")
 
-    print("\n🔧 Construyendo tablas SLR...")
+    print("\nConstruyendo tablas SLR...")
     tables = build_slr_tables(automaton, aug_grammar)
 
     print(f"   Entradas en ACTION: {len(tables.action)}")
@@ -319,7 +319,7 @@ def build_parser(grammar: Grammar) -> Tuple[Grammar, LR0Automaton, SLRTables]:
         for c in tables.conflicts:
             print(f"   {c}")
     else:
-        print("\n✅ Sin conflictos. La gramática es SLR(1).")
+        print("\n :D Sin conflictos. La gramática es SLR(1).")
 
     return aug_grammar, automaton, tables
 

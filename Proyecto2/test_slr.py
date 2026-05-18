@@ -123,4 +123,4 @@ if __name__ == "__main__":
     print("  automaton   → LR0Automaton      (visualizar el grafo de estados)")
     print("  tables      → SLRTables         (ejecutar el parser)")
     print("="*60)
-    print("\n✅ Prueba completada.")
+    print("\nPrueba completada.")
