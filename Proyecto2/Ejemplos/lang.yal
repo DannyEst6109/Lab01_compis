@@ -1,0 +1,33 @@
+(* Analizador léxico para un lenguaje imperativo simple *)
+
+let digito  = ['0'-'9']
+let letra   = ['a'-'z' 'A'-'Z']
+let entero  = digito+
+let flotante = digito+ '.' digito+
+let ident   = letra (letra | digito | '_')*
+let espacio = [' ' '\t' '\n']+
+let comentario = "//" [^ '\n']*
+
+rule tokens =
+    espacio         { }
+  | comentario      { }
+  | "if"            { print("IF") }
+  | "else"          { print("ELSE") }
+  | "while"         { print("WHILE") }
+  | "return"        { print("RETURN") }
+  | flotante        { print("FLOTANTE: " + lxm) }
+  | entero          { print("ENTERO: " + lxm) }
+  | ident           { print("IDENT: " + lxm) }
+  | '='             { print("ASSIGN") }
+  | "=="            { print("EQ") }
+  | "!="            { print("NEQ") }
+  | '<'             { print("LT") }
+  | '>'             { print("GT") }
+  | '+'             { print("SUMA") }
+  | '-'             { print("RESTA") }
+  | '*'             { print("MULT") }
+  | ';'             { print("SEMI") }
+  | '{'             { print("LBRACE") }
+  | '}'             { print("RBRACE") }
+  | '('             { print("LPAREN") }
+  | ')'             { print("RPAREN") }

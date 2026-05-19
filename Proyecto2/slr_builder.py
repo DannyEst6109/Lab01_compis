@@ -40,6 +40,9 @@ def augment_grammar(grammar: Grammar) -> Grammar:
     augmented_follow = dict(grammar.follow)
     augmented_follow[new_start] = {'$'}
 
+    original_start = grammar.start_symbol
+    augmented_follow[original_start] = augmented_follow.get(original_start, set()) | {'$'}
+
     return Grammar(
         terminals=grammar.terminals + (['$'] if '$' not in grammar.terminals else []),
         non_terminals=[new_start] + grammar.non_terminals,
@@ -185,38 +188,16 @@ def build_lr0_automaton(grammar: Grammar) -> LR0Automaton:
 # =============================================================================
 # PASO 5: Construcción de las Tablas SLR
 # =============================================================================
-
 def build_slr_tables(automaton: LR0Automaton, grammar: Grammar) -> SLRTables:
-    """
-    Construye las tablas ACTION y GOTO del parser SLR.
-
-    REGLAS SLR:
-        Para cada estado I y cada ítem [A → α • a β] donde 'a' es terminal:
-            ACTION[I, a] = shift al estado GOTO(I, a)
-
-        Para cada estado I y cada ítem completo [A → α •] donde A ≠ S':
-            Para cada terminal 'a' en FOLLOW(A):
-                ACTION[I, a] = reduce con A → α
-            (Aquí está la diferencia entre LR(0) puro y SLR: usamos FOLLOW)
-
-        Para el ítem [S' → S •]:
-            ACTION[I, $] = accept
-
-        Para cada estado I y no-terminal A:
-            Si GOTO(I, A) = J, entonces GOTO_TABLE[I, A] = J
-
-    Si en algún momento queremos escribir dos acciones distintas en la misma celda
-    → CONFLICTO (shift/reduce o reduce/reduce).
-    """
     action: Dict[Tuple[int, str], Tuple] = {}
     goto_table: Dict[Tuple[int, str], int] = {}
     conflicts: List[str] = []
 
-    # Identificar la producción aumentada (S' → S) para saber cuándo aceptar
-    aug_head, aug_body = grammar.productions[0]
+    # ── CAMBIO: usa start_symbol en lugar de productions[0] ──────────
+    aug_start = grammar.start_symbol   # siempre es "programa'" (o S')
+    # ─────────────────────────────────────────────────────────────────
 
-    def set_action(state_id: int, symbol: str, new_action: Tuple):
-        """Intenta asignar una acción; registra conflicto si ya hay una diferente."""
+    def set_action(state_id, symbol, new_action):
         key = (state_id, symbol)
         if key in action:
             existing = action[key]
@@ -227,7 +208,6 @@ def build_slr_tables(automaton: LR0Automaton, grammar: Grammar) -> SLRTables:
                 )
                 if conflict_msg not in conflicts:
                     conflicts.append(conflict_msg)
-                # Convención: en conflicto shift/reduce, preferimos shift (como Yacc)
                 if new_action[0] == 'shift':
                     action[key] = new_action
         else:
@@ -238,37 +218,25 @@ def build_slr_tables(automaton: LR0Automaton, grammar: Grammar) -> SLRTables:
             next_sym = item.next_symbol()
 
             if next_sym is not None:
-                # ── El punto NO está al final ──────────────────────────────
-
                 if next_sym in grammar.terminals:
-                    # SHIFT: el punto está antes de un terminal
                     if (state.id, next_sym) in automaton.transitions:
                         target = automaton.transitions[(state.id, next_sym)]
                         set_action(state.id, next_sym, ("shift", target))
-
                 elif next_sym in grammar.non_terminals:
-                    # GOTO: el punto está antes de un no-terminal
                     if (state.id, next_sym) in automaton.transitions:
                         goto_table[(state.id, next_sym)] = automaton.transitions[(state.id, next_sym)]
-
             else:
-                # ── El punto está al final → reducir o aceptar ────────────
-
-                if item.head == aug_head and list(item.body) == aug_body:
-                    # Es S' → S • → ACCEPT
+                # ── CAMBIO: basta comparar item.head con aug_start ────
+                if item.head == aug_start:
                     set_action(state.id, '$', ("accept",))
-
+                # ─────────────────────────────────────────────────────
                 else:
-                    # Buscar el índice de esta producción en grammar.productions
                     prod_index = _find_production_index(grammar, item.head, list(item.body))
-
-                    # REDUCE para cada terminal en FOLLOW(cabeza)
                     follow_set = grammar.follow.get(item.head, set())
                     for terminal in follow_set:
                         set_action(state.id, terminal, ("reduce", prod_index))
 
     return SLRTables(action=action, goto=goto_table, conflicts=conflicts)
-
 
 def _find_production_index(grammar: Grammar, head: str, body: List[str]) -> int:
     """Devuelve el índice de la producción (head, body) en grammar.productions."""

@@ -16,11 +16,17 @@
 IGNORE ESPACIO COMENTARIO
 
 %%
+/* Regla de entrada inicial */
+inicio:
+    programa
+;
 
 /* Programa: secuencia de sentencias separadas por NEWLINE */
 programa:
     programa sentencia NEWLINE
   | sentencia NEWLINE
+  | programa sentencia
+  | sentencia
 ;
 
 /* Sentencia: cualquier construcción válida */
@@ -54,7 +60,8 @@ params:
 
 /* Bloque indentado (simplificado: una o más sentencias) */
 bloque:
-    programa
+    NEWLINE programa
+  | programa
 ;
 
 /* Sentencia if / elif / else */

@@ -1,0 +1,54 @@
+(* Analizador léxico para un subconjunto de Python *)
+
+let digito   = ['0'-'9']
+let letra    = ['a'-'z' 'A'-'Z']
+let entero   = digito+
+let flotante = digito+ '.' digito+
+let ident    = letra (letra | digito | '_')*
+let espacio  = [' ' '\t']+
+let cadena   = '"' [^ '"']* '"'
+let comentario = '#' [^ '\n']*
+
+rule tokens =
+    espacio         { }
+  | '\n'            { print("NEWLINE") }
+  | comentario      { }
+  | "def"           { print("DEF") }
+  | "class"         { print("CLASS") }
+  | "if"            { print("IF") }
+  | "elif"          { print("ELIF") }
+  | "else"          { print("ELSE") }
+  | "while"         { print("WHILE") }
+  | "for"           { print("FOR") }
+  | "in"            { print("IN") }
+  | "return"        { print("RETURN") }
+  | "True"          { print("TRUE") }
+  | "False"         { print("FALSE") }
+  | "and"           { print("AND") }
+  | "or"            { print("OR") }
+  | "not"           { print("NOT") }
+  | "None"          { print("NONE") }
+  | flotante        { print("FLOTANTE: " + lxm) }
+  | entero          { print("ENTERO: " + lxm) }
+  | cadena          { print("CADENA: " + lxm) }
+  | ident           { print("IDENT: " + lxm) }
+  | "=="            { print("EQ") }
+  | "!="            { print("NEQ") }
+  | "<="            { print("LEQ") }
+  | ">="            { print("GEQ") }
+  | '<'             { print("LT") }
+  | '>'             { print("GT") }
+  | '='             { print("ASSIGN") }
+  | "+="            { print("PLUS_ASSIGN") }
+  | "-="            { print("MINUS_ASSIGN") }
+  | '+'             { print("SUMA") }
+  | '-'             { print("RESTA") }
+  | '*'             { print("MULT") }
+  | '/'             { print("DIV") }
+  | '%'             { print("MOD") }
+  | ':'             { print("COLON") }
+  | ','             { print("COMMA") }
+  | '('             { print("LPAREN") }
+  | ')'             { print("RPAREN") }
+  | '['             { print("LBRACKET") }
+  | ']'             { print("RBRACKET") }

@@ -1,0 +1,15 @@
+def calcular_descuento(precio, VIP):
+    if VIP == True:
+        return precio * 0.15
+    if VIP == False:
+        return precio * 0.05
+
+def aplicar_impuesto(monto):
+    return monto * 1.12
+
+# Programa principal
+precio_base = 100
+es_cliente_vip = True
+descuento = calcular_descuento(precio_base, es_cliente_vip)
+total = precio_base - descuento
+total_con_iva = aplicar_impuesto(total)

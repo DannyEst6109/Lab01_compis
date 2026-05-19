@@ -34,6 +34,7 @@ def build_syntax_pipeline(yalp_path: str | os.PathLike[str]):
     print("=" * 60)
 
     aug_grammar, automaton, tables = build_parser(grammar)
+    print("DEBUG ACCEPT:", tables.action.get((105, '$')))
     print_automaton(automaton)
     print_slr_tables(tables, aug_grammar)
 
