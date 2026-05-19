@@ -1,0 +1,6 @@
+def calcular_total(precio, impuesto):
+    if precio < 0    # <--- ERROR SINTACTICO: Falta el token COLON (:)
+        return 0
+    
+    resultado = precio + impuesto
+    return resultado

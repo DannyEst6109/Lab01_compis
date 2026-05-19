@@ -217,6 +217,12 @@ class App(tk.Tk):
         )
         for err in lex_result.errors:
             self._append(err)
+        
+        if lex_result.errors:
+            self._append("Resultado final: RECHAZADA (error léxico)")
+            return
+
+        
         self._append(f"Tokens reconocidos: {[token for token, _ in lex_result.tokens]}")
 
         self._append("\nEjecutando parser SLR...")

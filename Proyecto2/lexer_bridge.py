@@ -131,6 +131,11 @@ def tokenize_with_generated_lexer(
     log = log_buffer.getvalue()
     tokens = normalize_lexer_output(raw)
 
+    # Check stdout for lexical errors emitted by the generated lexer
+    for line in log.splitlines():
+        if "error" in line.lower():
+            errors.append(line)
+
     if not tokens:
         parsed_from_stdout, stdout_errors = parse_printed_tokens(log, terminals)
         tokens = parsed_from_stdout
